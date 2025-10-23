@@ -27,7 +27,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 
 # Create necessary directories and set permissions
-RUN mkdir -p media/student_photos static \
+RUN mkdir -p media/student_photos static staticfiles \
     && chown -R appuser:appuser /app
 
 # Switch to non-root user
