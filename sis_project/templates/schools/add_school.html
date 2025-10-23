@@ -1,0 +1,580 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add School - SIS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#667eea',
+                        secondary: '#764ba2',
+                        sidebar: '#1f2937',
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .formset-form { 
+            border-left: 4px solid #e5e7eb; 
+            position: relative;
+            min-height: 200px;
+        }
+        .formset-form.to-delete { 
+            border-left-color: #ef4444; 
+            background-color: #fef2f2; 
+        }
+        .formset-form.marked-for-deletion {
+            opacity: 0.5;
+        }
+        #department-forms {
+            min-height: 250px;
+        }
+        .form-container {
+            overflow-y: auto;
+            max-height: 70vh;
+        }
+        /* Ensure buttons stay visible */
+        .add-department-btn {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            background: white;
+            padding: 1rem 0;
+        }
+        /* Prevent layout shifts */
+        .formset-form input, .formset-form textarea, .formset-form select {
+            box-sizing: border-box;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div class="min-h-screen flex">
+        <!-- Sidebar -->
+        <div class="w-64 bg-sidebar text-white flex flex-col">
+            <!-- Logo Section -->
+            <div class="p-6 border-b border-gray-600">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-gradient-to-br from-primary to-secondary rounded-lg flex items-center justify-center">
+                        <i class="fas fa-graduation-cap text-white text-lg"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-bold">SIS Admin</h1>
+                        <p class="text-gray-400 text-sm">Management Panel</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Navigation Menu -->
+            <nav class="flex-1 p-4">
+                <ul class="space-y-2">
+                    <li>
+                        <a href="{% url 'dashboard' %}" class="flex items-center space-x-3 p-3 rounded-lg transition-colors hover:bg-gray-700">
+                            <i class="fas fa-tachometer-alt w-5"></i>
+                            <span>General</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'schools_list' %}" class="flex items-center space-x-3 p-3 rounded-lg transition-colors bg-primary">
+                            <i class="fas fa-school w-5"></i>
+                            <span>Schools</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'academic_groups_list' %}" class="flex items-center space-x-3 p-3 rounded-lg transition-colors hover:bg-gray-700">
+                            <i class="fas fa-users w-5"></i>
+                            <span>Academic Groups</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'tutors_list' %}" class="flex items-center space-x-3 p-3 rounded-lg transition-colors hover:bg-gray-700">
+                            <i class="fas fa-chalkboard-teacher w-5"></i>
+                            <span>Tutors</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'settings' %}" class="flex items-center space-x-3 p-3 rounded-lg transition-colors hover:bg-gray-700">
+                            <i class="fas fa-cog w-5"></i>
+                            <span>Settings</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+
+            <!-- User Profile Section -->
+            <div class="p-4 border-t border-gray-600">
+                <div class="flex items-center space-x-3 mb-4">
+                    <div class="w-10 h-10 bg-primary rounded-full flex items-center justify-center">
+                        <i class="fas fa-user text-white"></i>
+                    </div>
+                    <div class="flex-1">
+                        <p class="text-sm font-medium">{{ admin_name }}</p>
+                        <p class="text-xs text-gray-400">
+                            {% if is_super_admin %}Super Admin{% else %}Admin{% endif %}
+                        </p>
+                    </div>
+                </div>
+                <a href="{% url 'logout' %}" class="flex items-center space-x-2 text-gray-300 hover:text-white p-2 rounded-lg hover:bg-gray-700 transition-colors">
+                    <i class="fas fa-sign-out-alt text-sm"></i>
+                    <span class="text-sm">Sign out</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- Main Content Area -->
+        <div class="flex-1 flex flex-col">
+            <!-- Top Header -->
+            <header class="bg-white shadow-sm border-b border-gray-200 px-6 py-4">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h2 class="text-2xl font-bold text-gray-900">Add New School</h2>
+                        <p class="text-gray-600">Create a new educational institution with departments</p>
+                    </div>
+                    <a href="{% url 'schools_list' %}" class="bg-gray-500 text-white px-6 py-3 rounded-lg hover:bg-gray-600 transition-colors font-medium">
+                        <i class="fas fa-arrow-left mr-2"></i>Back to Schools
+                    </a>
+                </div>
+            </header>
+
+            <!-- Content Area -->
+            <main class="flex-1 p-6 overflow-y-auto">
+                <form method="post" class="max-w-4xl mx-auto">
+                    {% csrf_token %}
+                    
+                    <!-- School Information Section -->
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-100 mb-6">
+                        <div class="p-6 border-b border-gray-100">
+                            <h3 class="text-lg font-semibold text-gray-900">School Information</h3>
+                            <p class="text-sm text-gray-600">Basic information about the educational institution</p>
+                        </div>
+                        
+                        <div class="p-6">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                                        School Name <span class="text-red-500">*</span>
+                                    </label>
+                                    {{ school_form.name }}
+                                    {% if school_form.name.errors %}
+                                        <div class="mt-1 text-sm text-red-600">{{ school_form.name.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                                
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                                        School Code <span class="text-red-500">*</span>
+                                    </label>
+                                    {{ school_form.code }}
+                                    {% if school_form.code.errors %}
+                                        <div class="mt-1 text-sm text-red-600">{{ school_form.code.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="md:col-span-2">
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Address</label>
+                                    {{ school_form.address }}
+                                    {% if school_form.address.errors %}
+                                        <div class="mt-1 text-sm text-red-600">{{ school_form.address.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                                
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Phone</label>
+                                    {{ school_form.phone }}
+                                    {% if school_form.phone.errors %}
+                                        <div class="mt-1 text-sm text-red-600">{{ school_form.phone.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                                
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                                    {{ school_form.email }}
+                                    {% if school_form.email.errors %}
+                                        <div class="mt-1 text-sm text-red-600">{{ school_form.email.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                                
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Website</label>
+                                    {{ school_form.website }}
+                                    {% if school_form.website.errors %}
+                                        <div class="mt-1 text-sm text-red-600">{{ school_form.website.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                                
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Established Date</label>
+                                    {{ school_form.established_date }}
+                                    {% if school_form.established_date.errors %}
+                                        <div class="mt-1 text-sm text-red-600">{{ school_form.established_date.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="md:col-span-2">
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Description</label>
+                                    {{ school_form.description }}
+                                    {% if school_form.description.errors %}
+                                        <div class="mt-1 text-sm text-red-600">{{ school_form.description.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                                
+                                <div>
+                                    <label class="flex items-center">
+                                        {{ school_form.is_active }}
+                                        <span class="ml-2 text-sm font-medium text-gray-700">Active</span>
+                                    </label>
+                                    {% if school_form.is_active.errors %}
+                                        <div class="mt-1 text-sm text-red-600">{{ school_form.is_active.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Departments Section -->
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-100 mb-6">
+                        <div class="add-department-btn p-6 border-b border-gray-100 flex items-center justify-between">
+                            <div>
+                                <h3 class="text-lg font-semibold text-gray-900">Departments</h3>
+                                <p class="text-sm text-gray-600">Add departments for this school (Maximum: 20)</p>
+                            </div>
+                            <button type="button" onclick="addDepartment()" class="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition-colors text-sm">
+                                <i class="fas fa-plus mr-2"></i>Add Department
+                            </button>
+                        </div>
+                        
+                        <div class="form-container p-6">
+                            {{ department_formset.management_form }}
+                            
+                            <div id="department-forms" class="space-y-4">
+                                {% for form in department_formset %}
+                                    <div class="formset-form p-4 bg-gray-50 rounded-lg">
+                                        <div class="flex items-center justify-between mb-4">
+                                            <h4 class="text-md font-medium text-gray-900">
+                                                Department {{ forloop.counter }}
+                                            </h4>
+                                            {% if not forloop.first %}
+                                                <button type="button" onclick="removeDepartment(this)" class="text-red-600 hover:text-red-800 text-sm">
+                                                    <i class="fas fa-trash mr-1"></i>Remove
+                                                </button>
+                                            {% endif %}
+                                        </div>
+                                        
+                                        {% for hidden in form.hidden_fields %}
+                                            {{ hidden }}
+                                        {% endfor %}
+                                        
+                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 mb-1">
+                                                    Department Name <span class="text-red-500">*</span>
+                                                </label>
+                                                {{ form.name }}
+                                                {% if form.name.errors %}
+                                                    <div class="mt-1 text-sm text-red-600">{{ form.name.errors.0 }}</div>
+                                                {% endif %}
+                                            </div>
+                                            
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 mb-1">
+                                                    Department Code <span class="text-red-500">*</span>
+                                                </label>
+                                                {{ form.code }}
+                                                {% if form.code.errors %}
+                                                    <div class="mt-1 text-sm text-red-600">{{ form.code.errors.0 }}</div>
+                                                {% endif %}
+                                            </div>
+                                            
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 mb-1">Department Head</label>
+                                                {{ form.head_name }}
+                                                {% if form.head_name.errors %}
+                                                    <div class="mt-1 text-sm text-red-600">{{ form.head_name.errors.0 }}</div>
+                                                {% endif %}
+                                            </div>
+                                            
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+                                                {{ form.phone }}
+                                                {% if form.phone.errors %}
+                                                    <div class="mt-1 text-sm text-red-600">{{ form.phone.errors.0 }}</div>
+                                                {% endif %}
+                                            </div>
+                                            
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                                                {{ form.email }}
+                                                {% if form.email.errors %}
+                                                    <div class="mt-1 text-sm text-red-600">{{ form.email.errors.0 }}</div>
+                                                {% endif %}
+                                            </div>
+                                            
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 mb-1">Office Location</label>
+                                                {{ form.office_location }}
+                                                {% if form.office_location.errors %}
+                                                    <div class="mt-1 text-sm text-red-600">{{ form.office_location.errors.0 }}</div>
+                                                {% endif %}
+                                            </div>
+                                            
+                                            <div class="md:col-span-2">
+                                                <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                                                {{ form.description }}
+                                                {% if form.description.errors %}
+                                                    <div class="mt-1 text-sm text-red-600">{{ form.description.errors.0 }}</div>
+                                                {% endif %}
+                                            </div>
+                                            
+                                            <div>
+                                                <label class="flex items-center">
+                                                    {{ form.is_active }}
+                                                    <span class="ml-2 text-sm font-medium text-gray-700">Active</span>
+                                                </label>
+                                                {% if form.is_active.errors %}
+                                                    <div class="mt-1 text-sm text-red-600">{{ form.is_active.errors.0 }}</div>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                            
+                            {% if department_formset.non_form_errors %}
+                                <div class="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+                                    <div class="text-sm text-red-600">{{ department_formset.non_form_errors }}</div>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Submit Buttons -->
+                    <div class="flex space-x-4">
+                        <button type="submit" class="bg-primary text-white px-8 py-3 rounded-lg hover:bg-blue-700 transition-colors font-medium">
+                            <i class="fas fa-save mr-2"></i>Create School
+                        </button>
+                        <a href="{% url 'schools_list' %}" class="bg-gray-300 text-gray-700 px-8 py-3 rounded-lg hover:bg-gray-400 transition-colors font-medium">
+                            Cancel
+                        </a>
+                    </div>
+                </form>
+            </main>
+        </div>
+    </div>
+
+    <!-- Django Messages -->
+    {% if messages %}
+        <div class="fixed top-4 right-4 space-y-2 z-50">
+            {% for message in messages %}
+                <div class="{% if message.tags == 'success' %}bg-green-500{% elif message.tags == 'error' %}bg-red-500{% else %}bg-blue-500{% endif %} text-white px-6 py-3 rounded-lg shadow-lg">
+                    <div class="flex items-center">
+                        <i class="fas {% if message.tags == 'success' %}fa-check-circle{% elif message.tags == 'error' %}fa-exclamation-circle{% else %}fa-info-circle{% endif %} mr-2"></i>
+                        <span>{{ message }}</span>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <script>
+        let formCount = {{ department_formset.total_form_count }};
+        const maxForms = 20; // Maximum number of department forms allowed
+        
+        function addDepartment() {
+            if (formCount >= maxForms) {
+                alert('Maximum number of departments reached.');
+                return;
+            }
+            
+            const formsetDiv = document.getElementById('department-forms');
+            const totalFormsInput = document.getElementById('id_departments-TOTAL_FORMS');
+            
+            // Create new form HTML structure
+            const newFormHTML = `
+                <div class="formset-form p-4 bg-gray-50 rounded-lg" data-form-index="${formCount}">
+                    <div class="flex items-center justify-between mb-4">
+                        <h4 class="text-md font-medium text-gray-900">
+                            Department ${formCount + 1}
+                        </h4>
+                        <button type="button" onclick="removeDepartment(this)" class="text-red-600 hover:text-red-800 text-sm">
+                            <i class="fas fa-trash mr-1"></i>Remove
+                        </button>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">
+                                Department Name <span class="text-red-500">*</span>
+                            </label>
+                            <input type="text" name="departments-${formCount}-name" id="id_departments-${formCount}-name" 
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                                   required>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">
+                                Department Code <span class="text-red-500">*</span>
+                            </label>
+                            <input type="text" name="departments-${formCount}-code" id="id_departments-${formCount}-code" 
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                                   required>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Department Head</label>
+                            <input type="text" name="departments-${formCount}-head_name" id="id_departments-${formCount}-head_name" 
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+                            <input type="text" name="departments-${formCount}-phone" id="id_departments-${formCount}-phone" 
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                            <input type="email" name="departments-${formCount}-email" id="id_departments-${formCount}-email" 
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Office Location</label>
+                            <input type="text" name="departments-${formCount}-office_location" id="id_departments-${formCount}-office_location" 
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                        </div>
+                        
+                        <div>
+                            <label class="flex items-center">
+                                <input type="checkbox" name="departments-${formCount}-is_active" id="id_departments-${formCount}-is_active" 
+                                       class="form-checkbox h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded" checked>
+                                <span class="ml-2 text-sm font-medium text-gray-700">Active</span>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <input type="hidden" name="departments-${formCount}-id" id="id_departments-${formCount}-id">
+                </div>
+            `;
+            
+            // Add the new form to the formset
+            formsetDiv.insertAdjacentHTML('beforeend', newFormHTML);
+            
+            // Increment form count and update total forms
+            formCount++;
+            totalFormsInput.value = formCount;
+            
+            // Update button states
+            updateAddButtonState();
+        }
+        
+        function removeDepartment(button) {
+            const form = button.closest('.formset-form');
+            const formIndex = form.getAttribute('data-form-index');
+            
+            // Check if this is an existing form (has an ID) or new form
+            const idInput = form.querySelector(`input[name$="-id"]`);
+            const hasId = idInput && idInput.value;
+            
+            if (hasId) {
+                // Mark existing form for deletion
+                let deleteInput = form.querySelector('input[name$="-DELETE"]');
+                if (!deleteInput) {
+                    deleteInput = document.createElement('input');
+                    deleteInput.type = 'hidden';
+                    deleteInput.name = `departments-${formIndex}-DELETE`;
+                    deleteInput.value = 'on';
+                    form.appendChild(deleteInput);
+                }
+                deleteInput.checked = true;
+                form.style.display = 'none';
+                form.classList.add('marked-for-deletion');
+            } else {
+                // Remove new form completely
+                form.remove();
+                
+                // Decrease form count and update total forms
+                formCount--;
+                document.getElementById('id_departments-TOTAL_FORMS').value = formCount;
+            }
+            
+            // Update form numbering for visible forms
+            updateFormNumbering();
+            updateAddButtonState();
+        }
+        
+        function updateFormNumbering() {
+            const visibleForms = document.querySelectorAll('.formset-form:not([style*="display: none"])');
+            visibleForms.forEach((form, index) => {
+                const title = form.querySelector('h4');
+                if (title) {
+                    title.textContent = `Department ${index + 1}`;
+                }
+            });
+        }
+        
+        function updateAddButtonState() {
+            const addButton = document.querySelector('button[onclick="addDepartment()"]');
+            if (addButton) {
+                const visibleFormsCount = document.querySelectorAll('.formset-form:not([style*="display: none"])').length;
+                addButton.disabled = visibleFormsCount >= maxForms;
+                if (addButton.disabled) {
+                    addButton.classList.add('opacity-50', 'cursor-not-allowed');
+                } else {
+                    addButton.classList.remove('opacity-50', 'cursor-not-allowed');
+                }
+            }
+        }
+        
+        // Initialize form numbering and button state on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add data-form-index to existing forms
+            const existingForms = document.querySelectorAll('.formset-form');
+            existingForms.forEach((form, index) => {
+                if (!form.hasAttribute('data-form-index')) {
+                    form.setAttribute('data-form-index', index);
+                }
+            });
+            
+            updateFormNumbering();
+            updateAddButtonState();
+        });
+        
+        // Auto-hide messages after 5 seconds
+        setTimeout(() => {
+            const messages = document.querySelectorAll('[class*="bg-green-500"], [class*="bg-red-500"], [class*="bg-blue-500"]');
+            messages.forEach(message => {
+                message.style.transform = 'translateX(100%)';
+                setTimeout(() => message.remove(), 300);
+            });
+        }, 5000);
+        
+        // Prevent form submission if validation fails
+        document.querySelector('form').addEventListener('submit', function(e) {
+            const requiredFields = document.querySelectorAll('input[required]:not([style*="display: none"])');
+            let hasErrors = false;
+            
+            requiredFields.forEach(field => {
+                if (!field.value.trim()) {
+                    field.classList.add('border-red-500');
+                    hasErrors = true;
+                } else {
+                    field.classList.remove('border-red-500');
+                }
+            });
+            
+            if (hasErrors) {
+                e.preventDefault();
+                alert('Please fill in all required fields.');
+            }
+        });
+    </script>
+</body>
+</html>

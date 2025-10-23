@@ -1,0 +1,452 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View Student - SIS Tutor</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#667eea',
+                        secondary: '#764ba2',
+                        sidebar: '#1f2937',
+                        sidebarHover: '#374151',
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .sidebar-item:hover { background-color: #374151; }
+        .sidebar-item.active { background-color: #667eea; }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div class="flex h-screen">
+        <!-- Sidebar -->
+        <div class="w-64 bg-sidebar text-white flex flex-col">
+            <!-- Logo Section -->
+            <div class="p-6 border-b border-gray-600">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-gradient-to-br from-primary to-secondary rounded-lg flex items-center justify-center">
+                        <i class="fas fa-graduation-cap text-white text-lg"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-bold">SIS Tutor</h1>
+                        <p class="text-gray-400 text-sm">Dashboard Panel</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Navigation Menu -->
+            <nav class="flex-1 p-4">
+                <ul class="space-y-2">
+                    <li>
+                        <a href="{% url 'tutors:dashboard' %}" class="sidebar-item flex items-center space-x-3 p-3 rounded-lg transition-colors">
+                            <i class="fas fa-tachometer-alt w-5"></i>
+                            <span>General</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'tutors:academic_groups' %}" class="sidebar-item active flex items-center space-x-3 p-3 rounded-lg transition-colors">
+                            <i class="fas fa-users w-5"></i>
+                            <span>Academic Groups</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'tutors:reports' %}" class="sidebar-item flex items-center space-x-3 p-3 rounded-lg transition-colors">
+                            <i class="fas fa-chart-bar w-5"></i>
+                            <span>Reports</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'tutors:settings' %}" class="sidebar-item flex items-center space-x-3 p-3 rounded-lg transition-colors">
+                            <i class="fas fa-cog w-5"></i>
+                            <span>Settings</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'tutors:settings' %}" class="sidebar-item flex items-center space-x-3 p-3 rounded-lg transition-colors">
+                            <i class="fas fa-cog w-5"></i>
+                            <span>Settings</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+
+            <!-- User Profile Section -->
+            <div class="p-4 border-t border-gray-600">
+                <div class="flex items-center space-x-3 mb-4">
+                    <div class="w-10 h-10 bg-primary rounded-full flex items-center justify-center">
+                        <i class="fas fa-chalkboard-teacher text-white"></i>
+                    </div>
+                    <div class="flex-1">
+                        <p class="text-sm font-medium">{{ tutor_name }}</p>
+                        <p class="text-xs text-gray-400">Tutor</p>
+                    </div>
+                </div>
+                <a href="{% url 'tutors:logout' %}" class="flex items-center space-x-2 text-gray-300 hover:text-white p-2 rounded-lg hover:bg-gray-700 transition-colors">
+                    <i class="fas fa-sign-out-alt text-sm"></i>
+                    <span class="text-sm">Sign out</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- Main Content Area -->
+        <div class="flex-1 flex flex-col">
+            <!-- Top Header -->
+            <header class="bg-white shadow-sm border-b border-gray-200 px-6 py-4">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <div class="flex items-center space-x-2 mb-2">
+                            <a href="{% url 'tutors:academic_groups' %}" class="text-primary hover:text-blue-700 font-medium">
+                                <i class="fas fa-arrow-left mr-1"></i> Academic Groups
+                            </a>
+                            <span class="text-gray-400">/</span>
+                            <a href="{% url 'tutors:group_students' group.id %}" class="text-primary hover:text-blue-700 font-medium">{{ group.group_name }}</a>
+                            <span class="text-gray-400">/</span>
+                            <span class="text-gray-600">{{ student.first_name }} {{ student.last_name }}</span>
+                        </div>
+                        <h2 class="text-2xl font-bold text-gray-900">Student Profile</h2>
+                        <p class="text-gray-600">{{ group.group_name }} - {{ group.school.name }}</p>
+                    </div>
+                    <div class="flex items-center space-x-3">
+                        <a href="{% url 'tutors:edit_student' student.id %}" 
+                           class="inline-flex items-center px-4 py-2 bg-primary text-white font-medium rounded-lg hover:bg-blue-700 transition-colors">
+                            <i class="fas fa-edit mr-2"></i>
+                            Edit Student
+                        </a>
+                        <a href="{% url 'tutors:delete_student' student.id %}" 
+                           class="inline-flex items-center px-4 py-2 bg-red-600 text-white font-medium rounded-lg hover:bg-red-700 transition-colors">
+                            <i class="fas fa-trash mr-2"></i>
+                            Delete Student
+                        </a>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Content Area -->
+            <main class="flex-1 p-6 overflow-y-auto">
+                <div class="max-w-4xl">
+                    <!-- Student Header Card -->
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-100 mb-6">
+                        <div class="p-6">
+                            <div class="flex items-start space-x-6">
+                                <div class="flex-shrink-0">
+                                    {% if student.photo %}
+                                        <img src="{{ student.photo.url }}" 
+                                             alt="{{ student.first_name }} {{ student.last_name }}" 
+                                             class="w-24 h-24 rounded-full object-cover border-4 border-gray-200">
+                                    {% else %}
+                                        <div class="w-24 h-24 bg-gray-300 rounded-full flex items-center justify-center border-4 border-gray-200">
+                                            <i class="fas fa-user text-gray-500 text-3xl"></i>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                <div class="flex-1">
+                                    <h3 class="text-2xl font-bold text-gray-900 mb-2">{{ student.first_name }} {% if student.middle_name %}{{ student.middle_name }} {% endif %}{{ student.last_name }}</h3>
+                                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                        <div>
+                                            <p class="text-sm font-medium text-gray-600">Student ID</p>
+                                            <p class="text-lg font-mono text-gray-900">{{ student.student_id|default:"Not assigned" }}</p>
+                                        </div>
+                                        <div>
+                                            <p class="text-sm font-medium text-gray-600">Status</p>
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-sm font-medium 
+                                                {% if student.status == 'active' %}bg-green-100 text-green-800{% elif student.status == 'inactive' %}bg-red-100 text-red-800{% elif student.status == 'graduated' %}bg-blue-100 text-blue-800{% else %}bg-yellow-100 text-yellow-800{% endif %}">
+                                                {{ student.get_status_display }}
+                                            </span>
+                                        </div>
+                                        <div>
+                                            <p class="text-sm font-medium text-gray-600">Enrolled</p>
+                                            <p class="text-sm text-gray-900">{{ student.enrollment_date|date:"M d, Y" }}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Personal Information -->
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-100 mb-6">
+                        <div class="p-6 border-b border-gray-200">
+                            <h3 class="text-lg font-semibold text-gray-900 flex items-center">
+                                <i class="fas fa-user mr-3 text-primary"></i>
+                                Personal Information
+                            </h3>
+                        </div>
+                        <div class="p-6">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-600">Date of Birth</label>
+                                    <p class="text-gray-900">{{ student.birthday|date:"F d, Y"|default:"Not provided" }}</p>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-600">Gender</label>
+                                    <p class="text-gray-900">{{ student.get_gender_display|default:"Not provided" }}</p>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-600">Nation</label>
+                                    <p class="text-gray-900">{{ student.get_nation_display }}</p>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-600">ID Card</label>
+                                    <p class="text-gray-900">{{ student.id_card|default:"Not provided" }}</p>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-600">Age</label>
+                                    <p class="text-gray-900">
+                                        {% if student.get_age == "Not provided" %}
+                                            {{ student.get_age }}
+                                        {% else %}
+                                            {{ student.get_age }} years old
+                                        {% endif %}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Contact Information -->
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-100 mb-6">
+                        <div class="p-6 border-b border-gray-200">
+                            <h3 class="text-lg font-semibold text-gray-900 flex items-center">
+                                <i class="fas fa-address-book mr-3 text-primary"></i>
+                                Contact Information
+                            </h3>
+                        </div>
+                        <div class="p-6">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                {% if student.phone_number %}
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-600">Phone Number</label>
+                                    <p class="text-gray-900">
+                                        <i class="fas fa-phone mr-2 text-primary"></i>
+                                        <a href="tel:{{ student.phone_number }}" class="hover:text-primary">{{ student.phone_number }}</a>
+                                    </p>
+                                </div>
+                                {% endif %}
+                                {% if student.email %}
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-600">Email Address</label>
+                                    <p class="text-gray-900">
+                                        <i class="fas fa-envelope mr-2 text-primary"></i>
+                                        <a href="mailto:{{ student.email }}" class="hover:text-primary">{{ student.email }}</a>
+                                    </p>
+                                </div>
+                                {% endif %}
+                                {% if student.home_address %}
+                                <div class="md:col-span-2">
+                                    <label class="block text-sm font-medium text-gray-600">Home Address</label>
+                                    <p class="text-gray-900">
+                                        <i class="fas fa-map-marker-alt mr-2 text-primary"></i>
+                                        {{ student.home_address }}
+                                    </p>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Family Information -->
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-100 mb-6">
+                        <div class="p-6 border-b border-gray-200">
+                            <h3 class="text-lg font-semibold text-gray-900 flex items-center">
+                                <i class="fas fa-home mr-3 text-primary"></i>
+                                Family Information
+                            </h3>
+                        </div>
+                        <div class="p-6">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                {% if student.marital_status %}
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-600">Marital Status</label>
+                                    <p class="text-gray-900">{{ student.get_marital_status_display }}</p>
+                                </div>
+                                {% endif %}
+                                
+                                <!-- Parent Status -->
+                                <div class="md:col-span-2">
+                                    <label class="block text-sm font-medium text-gray-600 mb-2">Parent Status</label>
+                                    <div class="flex flex-wrap gap-2">
+                                        {% if student.are_parents_deceased %}
+                                            <span class="px-2 py-1 bg-red-100 text-red-800 text-xs rounded-full">Both Parents Deceased</span>
+                                        {% else %}
+                                            {% if student.is_father_deceased %}
+                                                <span class="px-2 py-1 bg-red-100 text-red-800 text-xs rounded-full">Father Deceased</span>
+                                            {% endif %}
+                                            {% if student.is_mother_deceased %}
+                                                <span class="px-2 py-1 bg-red-100 text-red-800 text-xs rounded-full">Mother Deceased</span>
+                                            {% endif %}
+                                            {% if not student.is_father_deceased and not student.is_mother_deceased %}
+                                                <span class="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">Both Parents Alive</span>
+                                            {% endif %}
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                
+                                <!-- Father Information -->
+                                {% if not student.is_father_deceased and not student.are_parents_deceased %}
+                                    {% if student.father_first_name %}
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-600">Father's Name</label>
+                                        <p class="text-gray-900">{{ student.father_first_name }} {% if student.father_middle_name %}{{ student.father_middle_name }} {% endif %}{{ student.father_last_name }}</p>
+                                    </div>
+                                    {% endif %}
+                                    {% if student.father_phone_number %}
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-600">Father's Phone</label>
+                                        <p class="text-gray-900">
+                                            <i class="fas fa-phone mr-2 text-primary"></i>
+                                            <a href="tel:{{ student.father_phone_number }}" class="hover:text-primary">{{ student.father_phone_number }}</a>
+                                        </p>
+                                    </div>
+                                    {% endif %}
+                                    {% if student.father_telegram_username %}
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-600">Father's Telegram</label>
+                                        <p class="text-gray-900">
+                                            <i class="fab fa-telegram mr-2 text-primary"></i>
+                                            @{{ student.father_telegram_username }}
+                                        </p>
+                                    </div>
+                                    {% endif %}
+                                {% endif %}
+                                
+                                <!-- Mother Information -->
+                                {% if not student.is_mother_deceased and not student.are_parents_deceased %}
+                                    {% if student.mother_first_name %}
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-600">Mother's Name</label>
+                                        <p class="text-gray-900">{{ student.mother_first_name }} {% if student.mother_middle_name %}{{ student.mother_middle_name }} {% endif %}{{ student.mother_last_name }}</p>
+                                    </div>
+                                    {% endif %}
+                                    {% if student.mother_phone_number %}
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-600">Mother's Phone</label>
+                                        <p class="text-gray-900">
+                                            <i class="fas fa-phone mr-2 text-primary"></i>
+                                            <a href="tel:{{ student.mother_phone_number }}" class="hover:text-primary">{{ student.mother_phone_number }}</a>
+                                        </p>
+                                    </div>
+                                    {% endif %}
+                                    {% if student.mother_telegram_username %}
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-600">Mother's Telegram</label>
+                                        <p class="text-gray-900">
+                                            <i class="fab fa-telegram mr-2 text-primary"></i>
+                                            @{{ student.mother_telegram_username }}
+                                        </p>
+                                    </div>
+                                    {% endif %}
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Additional Information -->
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-100 mb-6">
+                        <div class="p-6 border-b border-gray-200">
+                            <h3 class="text-lg font-semibold text-gray-900 flex items-center">
+                                <i class="fas fa-info-circle mr-3 text-primary"></i>
+                                Additional Information
+                            </h3>
+                        </div>
+                        <div class="p-6">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div class="md:col-span-2">
+                                    <label class="block text-sm font-medium text-gray-600 mb-2">Social Status</label>
+                                    <div class="flex flex-wrap gap-2">
+                                        {% if student.is_from_large_family %}
+                                            <span class="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">Large Family</span>
+                                        {% endif %}
+                                        {% if student.is_from_low_income_family %}
+                                            <span class="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs rounded-full">Low Income</span>
+                                        {% endif %}
+                                        {% if student.is_from_troubled_family %}
+                                            <span class="px-2 py-1 bg-red-100 text-red-800 text-xs rounded-full">Troubled Family</span>
+                                        {% endif %}
+                                        {% if student.has_disability %}
+                                            <span class="px-2 py-1 bg-purple-100 text-purple-800 text-xs rounded-full">Has Disability</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-600">Created</label>
+                                    <p class="text-gray-900">{{ student.created_at|date:"M d, Y H:i" }}</p>
+                                </div>
+                                {% if student.updated_at %}
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-600">Last Updated</label>
+                                    <p class="text-gray-900">{{ student.updated_at|date:"M d, Y H:i" }}</p>
+                                </div>
+                                {% endif %}
+                                {% if student.telegram_username %}
+                                <div class="md:col-span-2">
+                                    <label class="block text-sm font-medium text-gray-600">Telegram</label>
+                                    <p class="text-gray-900">
+                                        <i class="fab fa-telegram mr-2 text-primary"></i>
+                                        @{{ student.telegram_username }}
+                                    </p>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Academic Group Information -->
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-100 mb-6">
+                        <div class="p-6 border-b border-gray-200">
+                            <h3 class="text-lg font-semibold text-gray-900 flex items-center">
+                                <i class="fas fa-graduation-cap mr-3 text-primary"></i>
+                                Academic Information
+                            </h3>
+                        </div>
+                        <div class="p-6">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-600">Academic Group</label>
+                                    <p class="text-gray-900">{{ group.group_name }} ({{ group.code }})</p>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-600">School</label>
+                                    <p class="text-gray-900">{{ group.school.name }}</p>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-600">Department</label>
+                                    <p class="text-gray-900">{{ group.department.name }}</p>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-600">Study Year & Semester</label>
+                                    <p class="text-gray-900">Year {{ group.study_year }}, Semester {{ group.semester }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="flex items-center justify-between">
+                        <a href="{% url 'tutors:group_students' group.id %}" 
+                           class="inline-flex items-center px-4 py-2 border border-gray-300 text-gray-700 bg-white rounded-lg hover:bg-gray-50 transition-colors">
+                            <i class="fas fa-arrow-left mr-2"></i>
+                            Back to Students
+                        </a>
+                        <a href="{% url 'tutors:edit_student' student.id %}" 
+                           class="inline-flex items-center px-4 py-2 bg-primary text-white font-medium rounded-lg hover:bg-blue-700 transition-colors">
+                            <i class="fas fa-edit mr-2"></i>
+                            Edit Student
+                        </a>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+</body>
+</html>

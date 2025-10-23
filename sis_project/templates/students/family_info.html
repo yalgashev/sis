@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Family Information - SIS Student</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#667eea',
+                        secondary: '#764ba2',
+                        sidebar: '#1f2937',
+                        sidebarHover: '#374151',
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .sidebar-item:hover { background-color: #374151; }
+        .sidebar-item.active { background-color: #667eea; }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div class="flex h-screen">
+        <!-- Sidebar -->
+        <div class="w-64 bg-sidebar text-white flex flex-col">
+            <!-- Logo Section -->
+            <div class="p-6 border-b border-gray-600">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
+                        <i class="fas fa-user-graduate text-white text-xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-bold">SIS Student</h1>
+                        <p class="text-gray-400 text-sm">{{ student_name }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Navigation Menu -->
+            <nav class="flex-1 p-4">
+                <ul class="space-y-2">
+                    <li>
+                        <a href="{% url 'students:dashboard' %}" class="sidebar-item flex items-center px-4 py-3 rounded-lg transition-colors">
+                            <i class="fas fa-tachometer-alt mr-3"></i>
+                            Dashboard
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'students:general' %}" class="sidebar-item flex items-center px-4 py-3 rounded-lg transition-colors">
+                            <i class="fas fa-info-circle mr-3"></i>
+                            General
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'students:personal_data' %}" class="sidebar-item flex items-center px-4 py-3 rounded-lg transition-colors">
+                            <i class="fas fa-user mr-3"></i>
+                            Personal Data
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'students:contact_info' %}" class="sidebar-item flex items-center px-4 py-3 rounded-lg transition-colors">
+                            <i class="fas fa-phone mr-3"></i>
+                            Contact Information
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'students:family_info' %}" class="sidebar-item flex items-center px-4 py-3 rounded-lg transition-colors active">
+                            <i class="fas fa-home mr-3"></i>
+                            Family Information
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'students:additional_info' %}" class="sidebar-item flex items-center px-4 py-3 rounded-lg transition-colors">
+                            <i class="fas fa-plus-circle mr-3"></i>
+                            Additional Information
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'students:change_password' %}" class="sidebar-item flex items-center px-4 py-3 rounded-lg transition-colors">
+                            <i class="fas fa-key mr-3"></i>
+                            Change Password
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+
+            <!-- Logout Button -->
+            <div class="p-4 border-t border-gray-600">
+                <a href="{% url 'students:logout' %}" class="sidebar-item flex items-center px-4 py-3 rounded-lg transition-colors text-red-300 hover:bg-red-900">
+                    <i class="fas fa-sign-out-alt mr-3"></i>
+                    Logout
+                </a>
+            </div>
+        </div>
+
+        <!-- Main Content Area -->
+        <div class="flex-1 flex flex-col overflow-hidden">
+            <!-- Top Header -->
+            <header class="bg-white shadow-sm border-b border-gray-200 px-6 py-4">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h2 class="text-2xl font-bold text-gray-900">Family Information</h2>
+                        <p class="text-gray-600">Update your family details</p>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <span class="text-sm text-gray-500">ID: {{ student_username }}</span>
+                        <div class="w-10 h-10 bg-primary rounded-full flex items-center justify-center">
+                            <span class="text-white font-medium">{{ student_name|first }}</span>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Content Area -->
+            <main class="flex-1 p-6 overflow-y-auto">
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="mb-6 p-4 rounded-lg {% if message.tags == 'success' %}bg-green-100 text-green-800 border border-green-200{% elif message.tags == 'error' %}bg-red-100 text-red-800 border border-red-200{% else %}bg-blue-100 text-blue-800 border border-blue-200{% endif %}">
+                            <i class="fas fa-{% if message.tags == 'success' %}check-circle{% elif message.tags == 'error' %}exclamation-circle{% else %}info-circle{% endif %} mr-2"></i>
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+
+                <!-- Family Information Form -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-100">
+                    <div class="p-6 border-b border-gray-200">
+                        <h3 class="text-lg font-semibold text-gray-900 flex items-center">
+                            <i class="fas fa-home mr-3 text-primary"></i>
+                            Family Information Form
+                        </h3>
+                        <p class="text-gray-600 mt-2">Please provide information about your family members.</p>
+                    </div>
+
+                    <div class="p-6">
+                        <form method="post" class="space-y-8">
+                            {% csrf_token %}
+
+                            <!-- General Family Status -->
+                            <div class="bg-gray-50 border border-gray-200 rounded-lg p-6">
+                                <h4 class="text-lg font-semibold text-gray-900 mb-6 flex items-center">
+                                    <i class="fas fa-users mr-2 text-gray-600"></i>
+                                    Family Status
+                                </h4>
+                                
+                                <div class="mb-6">
+                                    <label class="flex items-center">
+                                        {{ form.are_parents_divorced }}
+                                        <span class="ml-2 text-sm font-medium text-gray-800">Parents are divorced</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Father Information -->
+                            <div class="bg-blue-50 border border-blue-200 rounded-lg p-6">
+                                <h4 class="text-lg font-semibold text-blue-900 mb-6 flex items-center">
+                                    <i class="fas fa-male mr-2 text-blue-600"></i>
+                                    Father's Information
+                                </h4>
+                                
+                                <!-- Father Status -->
+                                <div class="mb-6">
+                                    <label class="flex items-center">
+                                        {{ form.is_father_deceased }}
+                                        <span class="ml-2 text-sm font-medium text-blue-800">Father is deceased</span>
+                                    </label>
+                                </div>
+
+                                <div id="father-fields" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <!-- Father First Name -->
+                                    <div>
+                                        <label class="block text-sm font-medium text-blue-700 mb-2">
+                                            First Name <span class="text-red-500">*</span>
+                                        </label>
+                                        {{ form.father_first_name }}
+                                        {% if form.father_first_name.errors %}
+                                            <div class="mt-1 text-sm text-red-600">{{ form.father_first_name.errors }}</div>
+                                        {% endif %}
+                                    </div>
+
+                                    <!-- Father Last Name -->
+                                    <div>
+                                        <label class="block text-sm font-medium text-blue-700 mb-2">
+                                            Last Name <span class="text-red-500">*</span>
+                                        </label>
+                                        {{ form.father_last_name }}
+                                        {% if form.father_last_name.errors %}
+                                            <div class="mt-1 text-sm text-red-600">{{ form.father_last_name.errors }}</div>
+                                        {% endif %}
+                                    </div>
+
+                                    <!-- Father Middle Name -->
+                                    <div>
+                                        <label class="block text-sm font-medium text-blue-700 mb-2">
+                                            Middle Name
+                                        </label>
+                                        {{ form.father_middle_name }}
+                                        {% if form.father_middle_name.errors %}
+                                            <div class="mt-1 text-sm text-red-600">{{ form.father_middle_name.errors }}</div>
+                                        {% endif %}
+                                    </div>
+
+                                    <!-- Father Phone -->
+                                    <div>
+                                        <label class="block text-sm font-medium text-blue-700 mb-2">
+                                            Phone Number <span class="text-red-500">*</span>
+                                        </label>
+                                        {{ form.father_phone_number }}
+                                        {% if form.father_phone_number.errors %}
+                                            <div class="mt-1 text-sm text-red-600">{{ form.father_phone_number.errors }}</div>
+                                        {% endif %}
+                                    </div>
+
+                                    <!-- Father Status -->
+                                    <div class="md:col-span-2">
+                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <div>
+                                                <label class="flex items-center">
+                                                    {{ form.is_father_retired }}
+                                                    <span class="ml-2 text-sm font-medium text-blue-700">Father is retired</span>
+                                                </label>
+                                            </div>
+                                            <div>
+                                                <label class="flex items-center">
+                                                    {{ form.is_father_disabled }}
+                                                    <span class="ml-2 text-sm font-medium text-blue-700">Father has disability</span>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Mother Information -->
+                            <div class="bg-pink-50 border border-pink-200 rounded-lg p-6">
+                                <h4 class="text-lg font-semibold text-pink-900 mb-6 flex items-center">
+                                    <i class="fas fa-female mr-2 text-pink-600"></i>
+                                    Mother's Information
+                                </h4>
+                                
+                                <!-- Mother Status -->
+                                <div class="mb-6">
+                                    <label class="flex items-center">
+                                        {{ form.is_mother_deceased }}
+                                        <span class="ml-2 text-sm font-medium text-pink-800">Mother is deceased</span>
+                                    </label>
+                                </div>
+
+                                <div id="mother-fields" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <!-- Mother First Name -->
+                                    <div>
+                                        <label class="block text-sm font-medium text-pink-700 mb-2">
+                                            First Name <span class="text-red-500">*</span>
+                                        </label>
+                                        {{ form.mother_first_name }}
+                                        {% if form.mother_first_name.errors %}
+                                            <div class="mt-1 text-sm text-red-600">{{ form.mother_first_name.errors }}</div>
+                                        {% endif %}
+                                    </div>
+
+                                    <!-- Mother Last Name -->
+                                    <div>
+                                        <label class="block text-sm font-medium text-pink-700 mb-2">
+                                            Last Name <span class="text-red-500">*</span>
+                                        </label>
+                                        {{ form.mother_last_name }}
+                                        {% if form.mother_last_name.errors %}
+                                            <div class="mt-1 text-sm text-red-600">{{ form.mother_last_name.errors }}</div>
+                                        {% endif %}
+                                    </div>
+
+                                    <!-- Mother Middle Name -->
+                                    <div>
+                                        <label class="block text-sm font-medium text-pink-700 mb-2">
+                                            Middle Name
+                                        </label>
+                                        {{ form.mother_middle_name }}
+                                        {% if form.mother_middle_name.errors %}
+                                            <div class="mt-1 text-sm text-red-600">{{ form.mother_middle_name.errors }}</div>
+                                        {% endif %}
+                                    </div>
+
+                                    <!-- Mother Phone -->
+                                    <div>
+                                        <label class="block text-sm font-medium text-pink-700 mb-2">
+                                            Phone Number <span class="text-red-500">*</span>
+                                        </label>
+                                        {{ form.mother_phone_number }}
+                                        {% if form.mother_phone_number.errors %}
+                                            <div class="mt-1 text-sm text-red-600">{{ form.mother_phone_number.errors }}</div>
+                                        {% endif %}
+                                    </div>
+
+                                    <!-- Mother Status -->
+                                    <div class="md:col-span-2">
+                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <div>
+                                                <label class="flex items-center">
+                                                    {{ form.is_mother_retired }}
+                                                    <span class="ml-2 text-sm font-medium text-pink-700">Mother is retired</span>
+                                                </label>
+                                            </div>
+                                            <div>
+                                                <label class="flex items-center">
+                                                    {{ form.is_mother_disabled }}
+                                                    <span class="ml-2 text-sm font-medium text-pink-700">Mother has disability</span>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Family Status Information -->
+                            <div class="bg-gray-50 border border-gray-200 rounded-lg p-6">
+                                <h4 class="text-lg font-semibold text-gray-900 mb-6 flex items-center">
+                                    <i class="fas fa-users mr-2 text-gray-600"></i>
+                                    Additional Family Information
+                                </h4>
+                                
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <!-- Siblings Count -->
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                                            Number of Siblings
+                                        </label>
+                                        {{ form.siblings_count }}
+                                        {% if form.siblings_count.errors %}
+                                            <div class="mt-1 text-sm text-red-600">{{ form.siblings_count.errors }}</div>
+                                        {% endif %}
+                                    </div>
+
+                                    <!-- Children Count -->
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                                            Number of Children (if any)
+                                        </label>
+                                        {{ form.children_count }}
+                                        {% if form.children_count.errors %}
+                                            <div class="mt-1 text-sm text-red-600">{{ form.children_count.errors }}</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+
+                                <!-- Guardian Information (only if both parents are deceased) -->
+                                <div class="mt-6" id="guardian-section" style="display: none;">
+                                    <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                                        <h5 class="text-sm font-semibold text-yellow-800 mb-3">Legal Guardian Information</h5>
+                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <div>
+                                                <label class="block text-sm font-medium text-yellow-700 mb-2">
+                                                    Legal Guardian Full Name <span class="text-red-500">*</span>
+                                                </label>
+                                                {{ form.guardian_name }}
+                                                {% if form.guardian_name.errors %}
+                                                    <div class="mt-1 text-sm text-red-600">{{ form.guardian_name.errors }}</div>
+                                                {% endif %}
+                                            </div>
+                                            <div>
+                                                <label class="block text-sm font-medium text-yellow-700 mb-2">
+                                                    Guardian Phone Number <span class="text-red-500">*</span>
+                                                </label>
+                                                {{ form.guardian_phone_number }}
+                                                {% if form.guardian_phone_number.errors %}
+                                                    <div class="mt-1 text-sm text-red-600">{{ form.guardian_phone_number.errors }}</div>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                        <p class="text-xs text-yellow-600 mt-2">Required when both parents are deceased</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Form Actions -->
+                            <div class="pt-6 border-t border-gray-200">
+                                <div class="flex items-center justify-between">
+                                    <a href="{% url 'students:dashboard' %}" 
+                                       class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">
+                                        <i class="fas fa-arrow-left mr-2"></i>
+                                        Back to Dashboard
+                                    </a>
+                                    <button type="submit" 
+                                            class="px-6 py-2 bg-primary text-white rounded-lg hover:bg-blue-600 transition-colors">
+                                        <i class="fas fa-save mr-2"></i>
+                                        Save Family Information
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script>
+        // Style form inputs
+        document.addEventListener('DOMContentLoaded', function() {
+            const inputs = document.querySelectorAll('input, select, textarea');
+            inputs.forEach(input => {
+                if (input.type === 'checkbox') {
+                    input.className = 'rounded border-gray-300 text-primary focus:ring-primary';
+                    return;
+                }
+                input.className = 'mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary focus:border-primary';
+                
+                // Add error styling
+                if (input.parentNode.querySelector('.text-red-600')) {
+                    input.classList.add('border-red-300', 'focus:ring-red-500', 'focus:border-red-500');
+                }
+            });
+
+            // Handle deceased parent logic
+            const fatherDeceasedCheckbox = document.querySelector('input[name="is_father_deceased"]');
+            const motherDeceasedCheckbox = document.querySelector('input[name="is_mother_deceased"]');
+            const fatherFields = document.getElementById('father-fields');
+            const motherFields = document.getElementById('mother-fields');
+
+            function toggleFatherFields() {
+                if (fatherDeceasedCheckbox.checked) {
+                    fatherFields.style.display = 'none';
+                } else {
+                    fatherFields.style.display = 'grid';
+                }
+            }
+
+            function toggleMotherFields() {
+                if (motherDeceasedCheckbox.checked) {
+                    motherFields.style.display = 'none';
+                } else {
+                    motherFields.style.display = 'grid';
+                }
+                toggleGuardianSection();
+            }
+
+            function toggleGuardianSection() {
+                const guardianSection = document.getElementById('guardian-section');
+                const bothDeceased = (fatherDeceasedCheckbox && fatherDeceasedCheckbox.checked) && 
+                                   (motherDeceasedCheckbox && motherDeceasedCheckbox.checked);
+                
+                if (bothDeceased) {
+                    guardianSection.style.display = 'block';
+                } else {
+                    guardianSection.style.display = 'none';
+                }
+            }
+
+            if (fatherDeceasedCheckbox) {
+                fatherDeceasedCheckbox.addEventListener('change', function() {
+                    toggleFatherFields();
+                    toggleGuardianSection();
+                });
+                toggleFatherFields(); // Initial call
+            }
+
+            if (motherDeceasedCheckbox) {
+                motherDeceasedCheckbox.addEventListener('change', toggleMotherFields);
+                toggleMotherFields(); // Initial call
+            }
+            
+            // Initial guardian section toggle
+            toggleGuardianSection();
+
+            // Phone number validation
+            const phoneInputs = document.querySelectorAll('input[name*="phone"]');
+            phoneInputs.forEach(input => {
+                input.addEventListener('input', function() {
+                    let value = this.value.replace(/\D/g, '');
+                    if (value.startsWith('998')) {
+                        value = '+' + value;
+                    } else if (value.length > 0 && !value.startsWith('+')) {
+                        value = '+998' + value;
+                    }
+                    this.value = value;
+                });
+            });
+        });
+    </script>
+</body>
+</html>

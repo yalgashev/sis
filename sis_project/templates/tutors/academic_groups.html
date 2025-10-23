@@ -1,0 +1,248 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Academic Groups - SIS Tutor</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#667eea',
+                        secondary: '#764ba2',
+                        sidebar: '#1f2937',
+                        sidebarHover: '#374151',
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .sidebar-item:hover { background-color: #374151; }
+        .sidebar-item.active { background-color: #667eea; }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div class="flex h-screen">
+        <!-- Sidebar -->
+        <div class="w-64 bg-sidebar text-white flex flex-col">
+            <!-- Logo Section -->
+            <div class="p-6 border-b border-gray-600">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-gradient-to-br from-primary to-secondary rounded-lg flex items-center justify-center">
+                        <i class="fas fa-graduation-cap text-white text-lg"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-bold">SIS Tutor</h1>
+                        <p class="text-gray-400 text-sm">Dashboard Panel</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Navigation Menu -->
+            <nav class="flex-1 p-4">
+                <ul class="space-y-2">
+                    <li>
+                        <a href="{% url 'tutors:dashboard' %}" class="sidebar-item flex items-center space-x-3 p-3 rounded-lg transition-colors">
+                            <i class="fas fa-tachometer-alt w-5"></i>
+                            <span>General</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'tutors:academic_groups' %}" class="sidebar-item active flex items-center space-x-3 p-3 rounded-lg transition-colors">
+                            <i class="fas fa-users w-5"></i>
+                            <span>Academic Groups</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'tutors:reports' %}" class="sidebar-item flex items-center space-x-3 p-3 rounded-lg transition-colors">
+                            <i class="fas fa-chart-bar w-5"></i>
+                            <span>Reports</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'tutors:settings' %}" class="sidebar-item flex items-center space-x-3 p-3 rounded-lg transition-colors">
+                            <i class="fas fa-cog w-5"></i>
+                            <span>Settings</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+
+            <!-- User Profile Section -->
+            <div class="p-4 border-t border-gray-600">
+                <div class="flex items-center space-x-3 mb-4">
+                    <div class="w-10 h-10 bg-primary rounded-full flex items-center justify-center">
+                        <i class="fas fa-chalkboard-teacher text-white"></i>
+                    </div>
+                    <div class="flex-1">
+                        <p class="text-sm font-medium">{{ tutor_name }}</p>
+                        <p class="text-xs text-gray-400">Tutor</p>
+                    </div>
+                </div>
+                <a href="{% url 'tutors:logout' %}" class="flex items-center space-x-2 text-gray-300 hover:text-white p-2 rounded-lg hover:bg-gray-700 transition-colors">
+                    <i class="fas fa-sign-out-alt text-sm"></i>
+                    <span class="text-sm">Sign out</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- Main Content Area -->
+        <div class="flex-1 flex flex-col">
+            <!-- Top Header -->
+            <header class="bg-white shadow-sm border-b border-gray-200 px-6 py-4">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h2 class="text-2xl font-bold text-gray-900">Academic Groups</h2>
+                        <p class="text-gray-600">Manage students in your assigned groups</p>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Content Area -->
+            <main class="flex-1 p-6 overflow-y-auto">
+                {% if page_obj %}
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-100">
+                        <div class="overflow-x-auto">
+                            <table class="w-full">
+                                <thead>
+                                    <tr class="border-b border-gray-200 bg-gray-50">
+                                        <th class="text-left py-4 px-6 font-semibold text-gray-900">Group Details</th>
+                                        <th class="text-left py-4 px-6 font-semibold text-gray-900">School & Department</th>
+                                        <th class="text-left py-4 px-6 font-semibold text-gray-900">Academic Info</th>
+                                        <th class="text-left py-4 px-6 font-semibold text-gray-900">Students</th>
+                                        <th class="text-left py-4 px-6 font-semibold text-gray-900">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-gray-100">
+                                    {% for group in page_obj %}
+                                        <tr class="hover:bg-gray-50 transition-colors">
+                                            <td class="py-4 px-6">
+                                                <div>
+                                                    <p class="font-semibold text-gray-900">{{ group.group_name }}</p>
+                                                    <p class="text-sm text-gray-600">Code: {{ group.code }}</p>
+                                                    <div class="flex items-center mt-1">
+                                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium 
+                                                            {% if group.is_active %}bg-green-100 text-green-800{% else %}bg-red-100 text-red-800{% endif %}">
+                                                            {% if group.is_active %}Active{% else %}Inactive{% endif %}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td class="py-4 px-6">
+                                                <div>
+                                                    <p class="font-medium text-gray-900">{{ group.school.name }}</p>
+                                                    <p class="text-sm text-gray-600">{{ group.department.name }}</p>
+                                                </div>
+                                            </td>
+                                            <td class="py-4 px-6">
+                                                <div>
+                                                    <p class="text-sm font-medium text-gray-900">Year {{ group.study_year }}</p>
+                                                    <p class="text-sm text-gray-600">Semester {{ group.semester }}</p>
+                                                    <p class="text-xs text-gray-500">{{ group.get_study_year_display }}</p>
+                                                </div>
+                                            </td>
+                                            <td class="py-4 px-6">
+                                                <div class="flex items-center space-x-2">
+                                                    <div class="flex-1">
+                                                        <div class="flex items-center justify-between mb-1">
+                                                            <span class="text-sm font-medium text-gray-900">
+                                                                {{ group.current_students }} / {{ group.max_students }}
+                                                            </span>
+                                                            <span class="text-xs text-gray-500">
+                                                                {% widthratio group.current_students group.max_students 100 as percentage %}
+                                                                {{ percentage }}%
+                                                            </span>
+                                                        </div>
+                                                        <div class="w-full bg-gray-200 rounded-full h-2">
+                                                            <div class="bg-primary h-2 rounded-full" 
+                                                                 style="width: {% widthratio group.current_students group.max_students 100 %}%"></div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td class="py-4 px-6">
+                                                <div class="flex items-center space-x-2">
+                                                    <a href="{% url 'tutors:group_students' group.id %}" 
+                                                       class="inline-flex items-center px-3 py-2 bg-primary text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors">
+                                                        <i class="fas fa-users mr-2"></i>
+                                                        Manage Students
+                                                    </a>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Pagination -->
+                    {% if page_obj.has_other_pages %}
+                        <div class="mt-6 flex items-center justify-between">
+                            <div class="flex-1 flex justify-between sm:hidden">
+                                {% if page_obj.has_previous %}
+                                    <a href="?page={{ page_obj.previous_page_number }}" class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                                        Previous
+                                    </a>
+                                {% endif %}
+                                {% if page_obj.has_next %}
+                                    <a href="?page={{ page_obj.next_page_number }}" class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                                        Next
+                                    </a>
+                                {% endif %}
+                            </div>
+                            <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+                                <div>
+                                    <p class="text-sm text-gray-700">
+                                        Showing <span class="font-medium">{{ page_obj.start_index }}</span> to <span class="font-medium">{{ page_obj.end_index }}</span> of <span class="font-medium">{{ page_obj.paginator.count }}</span> groups
+                                    </p>
+                                </div>
+                                <div>
+                                    <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px">
+                                        {% if page_obj.has_previous %}
+                                            <a href="?page=1" class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                                                <i class="fas fa-angle-double-left"></i>
+                                            </a>
+                                            <a href="?page={{ page_obj.previous_page_number }}" class="relative inline-flex items-center px-2 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                                                <i class="fas fa-angle-left"></i>
+                                            </a>
+                                        {% endif %}
+                                        
+                                        <span class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-primary text-sm font-medium text-white">
+                                            {{ page_obj.number }}
+                                        </span>
+                                        
+                                        {% if page_obj.has_next %}
+                                            <a href="?page={{ page_obj.next_page_number }}" class="relative inline-flex items-center px-2 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                                                <i class="fas fa-angle-right"></i>
+                                            </a>
+                                            <a href="?page={{ page_obj.paginator.num_pages }}" class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                                                <i class="fas fa-angle-double-right"></i>
+                                            </a>
+                                        {% endif %}
+                                    </nav>
+                                </div>
+                            </div>
+                        </div>
+                    {% endif %}
+                {% else %}
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-12 text-center">
+                        <div class="max-w-md mx-auto">
+                            <i class="fas fa-users text-gray-300 text-6xl mb-4"></i>
+                            <h3 class="text-lg font-semibold text-gray-900 mb-2">No Groups Assigned</h3>
+                            <p class="text-gray-600">You haven't been assigned to any academic groups yet. Contact your administrator to get groups assigned.</p>
+                        </div>
+                    </div>
+                {% endif %}
+            </main>
+        </div>
+    </div>
+</body>
+</html>

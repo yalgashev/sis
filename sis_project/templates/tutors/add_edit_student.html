@@ -1,0 +1,659 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ action }} Student - SIS Tutor</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#667eea',
+                        secondary: '#764ba2',
+                        sidebar: '#1f2937',
+                        sidebarHover: '#374151',
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .sidebar-item:hover { background-color: #374151; }
+        .sidebar-item.active { background-color: #667eea; }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div class="flex h-screen">
+        <!-- Sidebar -->
+        <div class="w-64 bg-sidebar text-white flex flex-col">
+            <!-- Logo Section -->
+            <div class="p-6 border-b border-gray-600">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-gradient-to-br from-primary to-secondary rounded-lg flex items-center justify-center">
+                        <i class="fas fa-graduation-cap text-white text-lg"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-bold">SIS Tutor</h1>
+                        <p class="text-gray-400 text-sm">Dashboard Panel</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Navigation Menu -->
+            <nav class="flex-1 p-4">
+                <ul class="space-y-2">
+                    <li>
+                        <a href="{% url 'tutors:dashboard' %}" class="sidebar-item flex items-center space-x-3 p-3 rounded-lg transition-colors">
+                            <i class="fas fa-tachometer-alt w-5"></i>
+                            <span>General</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'tutors:academic_groups' %}" class="sidebar-item active flex items-center space-x-3 p-3 rounded-lg transition-colors">
+                            <i class="fas fa-users w-5"></i>
+                            <span>Academic Groups</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'tutors:reports' %}" class="sidebar-item flex items-center space-x-3 p-3 rounded-lg transition-colors">
+                            <i class="fas fa-chart-bar w-5"></i>
+                            <span>Reports</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'tutors:settings' %}" class="sidebar-item flex items-center space-x-3 p-3 rounded-lg transition-colors">
+                            <i class="fas fa-cog w-5"></i>
+                            <span>Settings</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+
+            <!-- User Profile Section -->
+            <div class="p-4 border-t border-gray-600">
+                <div class="flex items-center space-x-3 mb-4">
+                    <div class="w-10 h-10 bg-primary rounded-full flex items-center justify-center">
+                        <i class="fas fa-chalkboard-teacher text-white"></i>
+                    </div>
+                    <div class="flex-1">
+                        <p class="text-sm font-medium">{{ tutor_name }}</p>
+                        <p class="text-xs text-gray-400">Tutor</p>
+                    </div>
+                </div>
+                <a href="{% url 'tutors:logout' %}" class="flex items-center space-x-2 text-gray-300 hover:text-white p-2 rounded-lg hover:bg-gray-700 transition-colors">
+                    <i class="fas fa-sign-out-alt text-sm"></i>
+                    <span class="text-sm">Sign out</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- Main Content Area -->
+        <div class="flex-1 flex flex-col">
+            <!-- Top Header -->
+            <header class="bg-white shadow-sm border-b border-gray-200 px-6 py-4">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <div class="flex items-center space-x-2 mb-2">
+                            <a href="{% url 'tutors:academic_groups' %}" class="text-primary hover:text-blue-700 font-medium">
+                                <i class="fas fa-arrow-left mr-1"></i> Academic Groups
+                            </a>
+                            <span class="text-gray-400">/</span>
+                            <a href="{% url 'tutors:group_students' group.id %}" class="text-primary hover:text-blue-700 font-medium">{{ group.group_name }}</a>
+                            <span class="text-gray-400">/</span>
+                            <span class="text-gray-600">{{ action }} Student</span>
+                        </div>
+                        <h2 class="text-2xl font-bold text-gray-900">{{ action }} Student</h2>
+                        <p class="text-gray-600">{{ group.group_name }} - {{ group.school.name }}</p>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Content Area -->
+            <main class="flex-1 p-6 overflow-y-auto">
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="mb-6 p-4 rounded-lg {% if message.tags == 'success' %}bg-green-100 text-green-800 border border-green-200{% elif message.tags == 'error' %}bg-red-100 text-red-800 border border-red-200{% else %}bg-blue-100 text-blue-800 border border-blue-200{% endif %}">
+                            <i class="fas fa-{% if message.tags == 'success' %}check-circle{% elif message.tags == 'error' %}exclamation-circle{% else %}info-circle{% endif %} mr-2"></i>
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+
+                <form method="post" enctype="multipart/form-data" class="max-w-4xl">
+                    {% csrf_token %}
+                    
+                    <!-- Information Notice -->
+                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+                        <div class="flex items-center">
+                            <i class="fas fa-info-circle text-blue-600 mr-3"></i>
+                            <div>
+                                <h4 class="text-blue-800 font-medium">Tutor Information Entry</h4>
+                                <p class="text-blue-700 text-sm">All fields are optional for tutor entry. Students will complete mandatory fields in their dashboard later.</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Academic Group Display -->
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-100 mb-6">
+                        <div class="p-6 border-b border-gray-200">
+                            <h3 class="text-lg font-semibold text-gray-900 flex items-center">
+                                <i class="fas fa-graduation-cap mr-3 text-primary"></i>
+                                Academic Group
+                            </h3>
+                        </div>
+                        <div class="p-6">
+                            <div>
+                                <label for="{{ form.academic_group_display.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Assigned to</label>
+                                {{ form.academic_group_display }}
+                                {% if form.academic_group_display.errors %}
+                                    <div class="mt-1 text-sm text-red-600">{{ form.academic_group_display.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Personal Information Section -->
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-100 mb-6">
+                        <div class="p-6 border-b border-gray-200">
+                            <h3 class="text-lg font-semibold text-gray-900 flex items-center">
+                                <i class="fas fa-user mr-3 text-primary"></i>
+                                Personal Information
+                            </h3>
+                        </div>
+                        <div class="p-6">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <!-- Photo Upload -->
+                                <div class="md:col-span-2">
+                                    <label for="{{ form.photo.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Profile Photo</label>
+                                    {{ form.photo }}
+                                    {% if form.photo.errors %}
+                                        <div class="mt-1 text-sm text-red-600">{{ form.photo.errors }}</div>
+                                    {% endif %}
+                                </div>
+
+                                <!-- Student ID -->
+                                <div>
+                                    <label for="{{ form.student_id.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Student ID</label>
+                                    {{ form.student_id }}
+                                    {% if form.student_id.errors %}
+                                        <div class="mt-1 text-sm text-red-600">{{ form.student_id.errors }}</div>
+                                    {% endif %}
+                                </div>
+
+                                <!-- ID Card -->
+                                <div>
+                                    <label for="{{ form.id_card.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">ID Card</label>
+                                    {{ form.id_card }}
+                                    {% if form.id_card.errors %}
+                                        <div class="mt-1 text-sm text-red-600">{{ form.id_card.errors }}</div>
+                                    {% endif %}
+                                </div>
+
+                                <!-- First Name -->
+                                <div>
+                                    <label for="{{ form.first_name.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">First Name *</label>
+                                    {{ form.first_name }}
+                                    {% if form.first_name.errors %}
+                                        <div class="mt-1 text-sm text-red-600">{{ form.first_name.errors }}</div>
+                                    {% endif %}
+                                </div>
+
+                                <!-- Last Name -->
+                                <div>
+                                    <label for="{{ form.last_name.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Last Name *</label>
+                                    {{ form.last_name }}
+                                    {% if form.last_name.errors %}
+                                        <div class="mt-1 text-sm text-red-600">{{ form.last_name.errors }}</div>
+                                    {% endif %}
+                                </div>
+
+                                <!-- Middle Name -->
+                                <div>
+                                    <label for="{{ form.middle_name.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Middle Name</label>
+                                    {{ form.middle_name }}
+                                    {% if form.middle_name.errors %}
+                                        <div class="mt-1 text-sm text-red-600">{{ form.middle_name.errors }}</div>
+                                    {% endif %}
+                                </div>
+
+                                <!-- Date of Birth -->
+                                <div>
+                                    <label for="{{ form.birthday.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Date of Birth</label>
+                                    {{ form.birthday }}
+                                    {% if form.birthday.errors %}
+                                        <div class="mt-1 text-sm text-red-600">{{ form.birthday.errors }}</div>
+                                    {% endif %}
+                                </div>
+
+                                <!-- Gender -->
+                                <div>
+                                    <label for="{{ form.gender.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Gender</label>
+                                    {{ form.gender }}
+                                    {% if form.gender.errors %}
+                                        <div class="mt-1 text-sm text-red-600">{{ form.gender.errors }}</div>
+                                    {% endif %}
+                                </div>
+
+                                <!-- Nation -->
+                                <div>
+                                    <label for="{{ form.nation.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Nation</label>
+                                    {{ form.nation }}
+                                    {% if form.nation.errors %}
+                                        <div class="mt-1 text-sm text-red-600">{{ form.nation.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Contact Information Section -->
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-100 mb-6">
+                        <div class="p-6 border-b border-gray-200">
+                            <h3 class="text-lg font-semibold text-gray-900 flex items-center">
+                                <i class="fas fa-address-book mr-3 text-primary"></i>
+                                Contact Information
+                            </h3>
+                        </div>
+                        <div class="p-6">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <!-- Phone Number -->
+                                <div>
+                                    <label for="{{ form.phone_number.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Phone Number</label>
+                                    {{ form.phone_number }}
+                                    {% if form.phone_number.errors %}
+                                        <div class="mt-1 text-sm text-red-600">{{ form.phone_number.errors }}</div>
+                                    {% endif %}
+                                </div>
+
+                                <!-- Email -->
+                                <div>
+                                    <label for="{{ form.email.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                                    {{ form.email }}
+                                    {% if form.email.errors %}
+                                        <div class="mt-1 text-sm text-red-600">{{ form.email.errors }}</div>
+                                    {% endif %}
+                                </div>
+
+                                <!-- Address -->
+                                <div class="md:col-span-2">
+                                    <label for="{{ form.home_address.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Home Address</label>
+                                    {{ form.home_address }}
+                                    {% if form.home_address.errors %}
+                                        <div class="mt-1 text-sm text-red-600">{{ form.home_address.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Family Information Section -->
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-100 mb-6">
+                        <div class="p-6 border-b border-gray-200">
+                            <h3 class="text-lg font-semibold text-gray-900 flex items-center">
+                                <i class="fas fa-home mr-3 text-primary"></i>
+                                Family Information
+                            </h3>
+                        </div>
+                        <div class="p-6">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <!-- Marital Status -->
+                                <div>
+                                    <label for="{{ form.marital_status.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Marital Status</label>
+                                    {{ form.marital_status }}
+                                    {% if form.marital_status.errors %}
+                                        <div class="mt-1 text-sm text-red-600">{{ form.marital_status.errors }}</div>
+                                    {% endif %}
+                                </div>
+
+                                <!-- Parent Status Section -->
+                                <div class="md:col-span-2">
+                                    <h4 class="text-sm font-medium text-gray-700 mb-3">Parent Status</h4>
+                                    <div class="grid grid-cols-3 gap-4">
+                                        <label class="flex items-center space-x-2">
+                                            {{ form.are_parents_deceased }}
+                                            <span class="text-sm text-gray-700">Both parents deceased</span>
+                                        </label>
+                                        <label class="flex items-center space-x-2">
+                                            {{ form.is_father_deceased }}
+                                            <span class="text-sm text-gray-700">Father deceased</span>
+                                        </label>
+                                        <label class="flex items-center space-x-2">
+                                            {{ form.is_mother_deceased }}
+                                            <span class="text-sm text-gray-700">Mother deceased</span>
+                                        </label>
+                                    </div>
+                                    {% if form.are_parents_deceased.errors %}
+                                        <div class="mt-1 text-sm text-red-600">{{ form.are_parents_deceased.errors }}</div>
+                                    {% endif %}
+                                    {% if form.is_father_deceased.errors %}
+                                        <div class="mt-1 text-sm text-red-600">{{ form.is_father_deceased.errors }}</div>
+                                    {% endif %}
+                                    {% if form.is_mother_deceased.errors %}
+                                        <div class="mt-1 text-sm text-red-600">{{ form.is_mother_deceased.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Father Information Section -->
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-100 mb-6" id="father-section">
+                        <div class="p-6 border-b border-gray-200">
+                            <h3 class="text-lg font-semibold text-gray-900 flex items-center">
+                                <i class="fas fa-male mr-3 text-primary"></i>
+                                Father Information
+                            </h3>
+                        </div>
+                        <div class="p-6">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <!-- Father's First Name -->
+                                <div>
+                                    <label for="{{ form.father_first_name.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Father's First Name</label>
+                                    {{ form.father_first_name }}
+                                    {% if form.father_first_name.errors %}
+                                        <div class="mt-1 text-sm text-red-600">{{ form.father_first_name.errors }}</div>
+                                    {% endif %}
+                                </div>
+
+                                <!-- Father's Last Name -->
+                                <div>
+                                    <label for="{{ form.father_last_name.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Father's Last Name</label>
+                                    {{ form.father_last_name }}
+                                    {% if form.father_last_name.errors %}
+                                        <div class="mt-1 text-sm text-red-600">{{ form.father_last_name.errors }}</div>
+                                    {% endif %}
+                                </div>
+
+                                <!-- Father's Middle Name -->
+                                <div>
+                                    <label for="{{ form.father_middle_name.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Father's Middle Name</label>
+                                    {{ form.father_middle_name }}
+                                    {% if form.father_middle_name.errors %}
+                                        <div class="mt-1 text-sm text-red-600">{{ form.father_middle_name.errors }}</div>
+                                    {% endif %}
+                                </div>
+
+                                <!-- Father's Phone -->
+                                <div>
+                                    <label for="{{ form.father_phone_number.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Father's Phone Number</label>
+                                    {{ form.father_phone_number }}
+                                    {% if form.father_phone_number.errors %}
+                                        <div class="mt-1 text-sm text-red-600">{{ form.father_phone_number.errors }}</div>
+                                    {% endif %}
+                                </div>
+
+                                <!-- Father's Telegram -->
+                                <div>
+                                    <label for="{{ form.father_telegram_username.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Father's Telegram Username</label>
+                                    {{ form.father_telegram_username }}
+                                    {% if form.father_telegram_username.errors %}
+                                        <div class="mt-1 text-sm text-red-600">{{ form.father_telegram_username.errors }}</div>
+                                    {% endif %}
+                                </div>
+
+                                <!-- Father Status -->
+                                <div class="md:col-span-2">
+                                    <h4 class="text-sm font-medium text-gray-700 mb-3">Father Status</h4>
+                                    <div class="grid grid-cols-2 gap-4">
+                                        <label class="flex items-center space-x-2">
+                                            {{ form.is_father_retired }}
+                                            <span class="text-sm text-gray-700">Retired</span>
+                                        </label>
+                                        <label class="flex items-center space-x-2">
+                                            {{ form.is_father_disabled }}
+                                            <span class="text-sm text-gray-700">Disabled</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Mother Information Section -->
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-100 mb-6" id="mother-section">
+                        <div class="p-6 border-b border-gray-200">
+                            <h3 class="text-lg font-semibold text-gray-900 flex items-center">
+                                <i class="fas fa-female mr-3 text-primary"></i>
+                                Mother Information
+                            </h3>
+                        </div>
+                        <div class="p-6">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <!-- Mother's First Name -->
+                                <div>
+                                    <label for="{{ form.mother_first_name.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Mother's First Name</label>
+                                    {{ form.mother_first_name }}
+                                    {% if form.mother_first_name.errors %}
+                                        <div class="mt-1 text-sm text-red-600">{{ form.mother_first_name.errors }}</div>
+                                    {% endif %}
+                                </div>
+
+                                <!-- Mother's Last Name -->
+                                <div>
+                                    <label for="{{ form.mother_last_name.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Mother's Last Name</label>
+                                    {{ form.mother_last_name }}
+                                    {% if form.mother_last_name.errors %}
+                                        <div class="mt-1 text-sm text-red-600">{{ form.mother_last_name.errors }}</div>
+                                    {% endif %}
+                                </div>
+
+                                <!-- Mother's Middle Name -->
+                                <div>
+                                    <label for="{{ form.mother_middle_name.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Mother's Middle Name</label>
+                                    {{ form.mother_middle_name }}
+                                    {% if form.mother_middle_name.errors %}
+                                        <div class="mt-1 text-sm text-red-600">{{ form.mother_middle_name.errors }}</div>
+                                    {% endif %}
+                                </div>
+
+                                <!-- Mother's Phone -->
+                                <div>
+                                    <label for="{{ form.mother_phone_number.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Mother's Phone Number</label>
+                                    {{ form.mother_phone_number }}
+                                    {% if form.mother_phone_number.errors %}
+                                        <div class="mt-1 text-sm text-red-600">{{ form.mother_phone_number.errors }}</div>
+                                    {% endif %}
+                                </div>
+
+                                <!-- Mother's Telegram -->
+                                <div>
+                                    <label for="{{ form.mother_telegram_username.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Mother's Telegram Username</label>
+                                    {{ form.mother_telegram_username }}
+                                    {% if form.mother_telegram_username.errors %}
+                                        <div class="mt-1 text-sm text-red-600">{{ form.mother_telegram_username.errors }}</div>
+                                    {% endif %}
+                                </div>
+
+                                <!-- Mother Status -->
+                                <div class="md:col-span-2">
+                                    <h4 class="text-sm font-medium text-gray-700 mb-3">Mother Status</h4>
+                                    <div class="grid grid-cols-2 gap-4">
+                                        <label class="flex items-center space-x-2">
+                                            {{ form.is_mother_retired }}
+                                            <span class="text-sm text-gray-700">Retired</span>
+                                        </label>
+                                        <label class="flex items-center space-x-2">
+                                            {{ form.is_mother_disabled }}
+                                            <span class="text-sm text-gray-700">Disabled</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Additional Information Section -->
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-100 mb-6">
+                        <div class="p-6 border-b border-gray-200">
+                            <h3 class="text-lg font-semibold text-gray-900 flex items-center">
+                                <i class="fas fa-info-circle mr-3 text-primary"></i>
+                                Additional Information
+                            </h3>
+                        </div>
+                        <div class="p-6">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <!-- Social Status Checkboxes -->
+                                <div class="md:col-span-2">
+                                    <h4 class="text-sm font-medium text-gray-700 mb-3">Social Status</h4>
+                                    <div class="grid grid-cols-2 gap-4">
+                                        <label class="flex items-center space-x-2">
+                                            {{ form.is_from_large_family }}
+                                            <span class="text-sm text-gray-700">From large family</span>
+                                        </label>
+                                        <label class="flex items-center space-x-2">
+                                            {{ form.is_from_low_income_family }}
+                                            <span class="text-sm text-gray-700">From low income family</span>
+                                        </label>
+                                        <label class="flex items-center space-x-2">
+                                            {{ form.is_from_troubled_family }}
+                                            <span class="text-sm text-gray-700">From troubled family</span>
+                                        </label>
+                                        <label class="flex items-center space-x-2">
+                                            {{ form.has_disability }}
+                                            <span class="text-sm text-gray-700">Has disability</span>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <!-- Telegram Username -->
+                                <div>
+                                    <label for="{{ form.telegram_username.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Telegram Username</label>
+                                    {{ form.telegram_username }}
+                                    {% if form.telegram_username.errors %}
+                                        <div class="mt-1 text-sm text-red-600">{{ form.telegram_username.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Form Actions -->
+                    <div class="flex items-center justify-between">
+                        <a href="{% url 'tutors:group_students' group.id %}" 
+                           class="inline-flex items-center px-4 py-2 border border-gray-300 text-gray-700 bg-white rounded-lg hover:bg-gray-50 transition-colors">
+                            <i class="fas fa-arrow-left mr-2"></i>
+                            Cancel
+                        </a>
+                        <button type="submit" 
+                                class="inline-flex items-center px-6 py-2 bg-primary text-white font-medium rounded-lg hover:bg-blue-700 transition-colors">
+                            <i class="fas fa-save mr-2"></i>
+                            {{ action }} Student
+                        </button>
+                    </div>
+                </form>
+            </main>
+        </div>
+    </div>
+
+    <!-- Add CSS for form styling -->
+    <style>
+        input[type="text"], input[type="email"], input[type="tel"], input[type="date"], input[type="file"], select, textarea {
+            width: 100%;
+            padding: 0.5rem 0.75rem;
+            border: 1px solid #d1d5db;
+            border-radius: 0.5rem;
+            background-color: #ffffff;
+            font-size: 0.875rem;
+        }
+        
+        input[type="text"]:focus, input[type="email"]:focus, input[type="tel"]:focus, input[type="date"]:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        textarea {
+            resize: vertical;
+            min-height: 4rem;
+        }
+        
+        input[type="file"] {
+            padding: 0.375rem;
+        }
+    </style>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const bothParentsDeceasedCheckbox = document.querySelector('input[name="are_parents_deceased"]');
+            const fatherDeceasedCheckbox = document.querySelector('input[name="is_father_deceased"]');
+            const motherDeceasedCheckbox = document.querySelector('input[name="is_mother_deceased"]');
+            const fatherSection = document.getElementById('father-section');
+            const motherSection = document.getElementById('mother-section');
+            
+            function updateParentSections() {
+                const bothParentsDeceased = bothParentsDeceasedCheckbox.checked;
+                const fatherDeceased = fatherDeceasedCheckbox.checked;
+                const motherDeceased = motherDeceasedCheckbox.checked;
+                
+                // If both parents are deceased, hide both sections and check individual checkboxes
+                if (bothParentsDeceased) {
+                    fatherSection.style.display = 'none';
+                    motherSection.style.display = 'none';
+                    fatherDeceasedCheckbox.checked = true;
+                    motherDeceasedCheckbox.checked = true;
+                } else {
+                    // Show/hide sections based on individual deceased status
+                    if (fatherDeceased) {
+                        fatherSection.style.display = 'none';
+                        // Clear father fields when hidden
+                        const fatherFields = fatherSection.querySelectorAll('input');
+                        fatherFields.forEach(field => {
+                            if (field.type !== 'checkbox') field.value = '';
+                        });
+                    } else {
+                        fatherSection.style.display = 'block';
+                    }
+                    
+                    if (motherDeceased) {
+                        motherSection.style.display = 'none';
+                        // Clear mother fields when hidden
+                        const motherFields = motherSection.querySelectorAll('input');
+                        motherFields.forEach(field => {
+                            if (field.type !== 'checkbox') field.value = '';
+                        });
+                    } else {
+                        motherSection.style.display = 'block';
+                    }
+                    
+                    // If both individual checkboxes are checked, check "both parents deceased"
+                    if (fatherDeceased && motherDeceased) {
+                        bothParentsDeceasedCheckbox.checked = true;
+                    }
+                }
+            }
+            
+            // Add event listeners
+            bothParentsDeceasedCheckbox.addEventListener('change', function() {
+                if (this.checked) {
+                    fatherDeceasedCheckbox.checked = true;
+                    motherDeceasedCheckbox.checked = true;
+                }
+                updateParentSections();
+            });
+            
+            fatherDeceasedCheckbox.addEventListener('change', function() {
+                if (!this.checked) {
+                    bothParentsDeceasedCheckbox.checked = false;
+                }
+                updateParentSections();
+            });
+            
+            motherDeceasedCheckbox.addEventListener('change', function() {
+                if (!this.checked) {
+                    bothParentsDeceasedCheckbox.checked = false;
+                }
+                updateParentSections();
+            });
+            
+            // Initial update
+            updateParentSections();
+        });
+    </script>
+</body>
+</html>

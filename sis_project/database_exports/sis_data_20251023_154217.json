@@ -1,0 +1,1062 @@
+[
+{
+  "model": "admin_app.admin",
+  "pk": 1,
+  "fields": {
+    "first_name": "Olimjon",
+    "last_name": "Yalgashev",
+    "username": "admin",
+    "password": "yalgashev",
+    "email": "olimjon@outlook.com",
+    "phone_number": "+998941811554",
+    "is_active": true,
+    "is_super_admin": true,
+    "last_login": "2025-10-23T09:54:09.079",
+    "created_at": "2025-10-21T07:45:42.931",
+    "updated_at": "2025-10-23T09:53:59.631"
+  }
+},
+{
+  "model": "admin_app.school",
+  "pk": 1,
+  "fields": {
+    "name": "School of Engineering",
+    "code": "SchEng",
+    "address": "",
+    "phone": null,
+    "email": null,
+    "website": null,
+    "established_date": null,
+    "description": "",
+    "is_active": true,
+    "created_at": "2025-10-21T08:33:05.586Z",
+    "updated_at": "2025-10-21T08:33:05.596Z"
+  }
+},
+{
+  "model": "admin_app.school",
+  "pk": 2,
+  "fields": {
+    "name": "Chinese Institute of Electric Power",
+    "code": "CIEP",
+    "address": "",
+    "phone": null,
+    "email": null,
+    "website": null,
+    "established_date": null,
+    "description": "",
+    "is_active": true,
+    "created_at": "2025-10-21T08:33:39.814Z",
+    "updated_at": "2025-10-21T08:33:39.817Z"
+  }
+},
+{
+  "model": "admin_app.school",
+  "pk": 3,
+  "fields": {
+    "name": "Korean Institute of Technology and Culture",
+    "code": "KITC",
+    "address": "",
+    "phone": null,
+    "email": null,
+    "website": null,
+    "established_date": null,
+    "description": "",
+    "is_active": true,
+    "created_at": "2025-10-21T08:34:27.954Z",
+    "updated_at": "2025-10-21T08:34:27.960Z"
+  }
+},
+{
+  "model": "admin_app.school",
+  "pk": 4,
+  "fields": {
+    "name": "French Higher School of Engineering and Commerce",
+    "code": "FrEngComm",
+    "address": "",
+    "phone": null,
+    "email": null,
+    "website": null,
+    "established_date": null,
+    "description": "",
+    "is_active": true,
+    "created_at": "2025-10-21T08:36:01.367Z",
+    "updated_at": "2025-10-21T08:36:01.372Z"
+  }
+},
+{
+  "model": "admin_app.school",
+  "pk": 5,
+  "fields": {
+    "name": "School of Computing",
+    "code": "SchComp",
+    "address": "",
+    "phone": null,
+    "email": null,
+    "website": null,
+    "established_date": null,
+    "description": "",
+    "is_active": true,
+    "created_at": "2025-10-21T08:37:06.225Z",
+    "updated_at": "2025-10-21T08:37:59.536Z"
+  }
+},
+{
+  "model": "admin_app.school",
+  "pk": 6,
+  "fields": {
+    "name": "Business School",
+    "code": "BSch",
+    "address": "",
+    "phone": null,
+    "email": null,
+    "website": null,
+    "established_date": null,
+    "description": "",
+    "is_active": true,
+    "created_at": "2025-10-21T08:39:20.949Z",
+    "updated_at": "2025-10-21T08:39:20.954Z"
+  }
+},
+{
+  "model": "admin_app.department",
+  "pk": 1,
+  "fields": {
+    "school": 1,
+    "name": "Geological Engineering",
+    "code": "GE",
+    "head_name": null,
+    "phone": null,
+    "email": null,
+    "office_location": null,
+    "description": "",
+    "is_active": true,
+    "created_at": "2025-10-21T08:33:05.591Z",
+    "updated_at": "2025-10-21T08:33:05.598Z"
+  }
+},
+{
+  "model": "admin_app.department",
+  "pk": 2,
+  "fields": {
+    "school": 1,
+    "name": "Mining",
+    "code": "M",
+    "head_name": null,
+    "phone": null,
+    "email": null,
+    "office_location": null,
+    "description": "",
+    "is_active": true,
+    "created_at": "2025-10-21T08:33:05.591Z",
+    "updated_at": "2025-10-21T08:33:05.601Z"
+  }
+},
+{
+  "model": "admin_app.department",
+  "pk": 3,
+  "fields": {
+    "school": 1,
+    "name": "Petroleum Engineering",
+    "code": "PE",
+    "head_name": null,
+    "phone": null,
+    "email": null,
+    "office_location": null,
+    "description": "",
+    "is_active": true,
+    "created_at": "2025-10-21T08:33:05.593Z",
+    "updated_at": "2025-10-21T08:33:05.602Z"
+  }
+},
+{
+  "model": "admin_app.department",
+  "pk": 4,
+  "fields": {
+    "school": 1,
+    "name": "Chemical Engineering",
+    "code": "CHE",
+    "head_name": null,
+    "phone": null,
+    "email": null,
+    "office_location": null,
+    "description": "",
+    "is_active": true,
+    "created_at": "2025-10-21T08:33:05.593Z",
+    "updated_at": "2025-10-21T08:33:05.602Z"
+  }
+},
+{
+  "model": "admin_app.department",
+  "pk": 5,
+  "fields": {
+    "school": 2,
+    "name": "Energy and Power Engineering",
+    "code": "EPE",
+    "head_name": null,
+    "phone": null,
+    "email": null,
+    "office_location": null,
+    "description": "",
+    "is_active": true,
+    "created_at": "2025-10-21T08:33:39.817Z",
+    "updated_at": "2025-10-21T08:33:39.818Z"
+  }
+},
+{
+  "model": "admin_app.department",
+  "pk": 6,
+  "fields": {
+    "school": 3,
+    "name": "Renewable Energy",
+    "code": "RE",
+    "head_name": null,
+    "phone": null,
+    "email": null,
+    "office_location": null,
+    "description": "",
+    "is_active": true,
+    "created_at": "2025-10-21T08:34:27.957Z",
+    "updated_at": "2025-10-21T08:34:27.963Z"
+  }
+},
+{
+  "model": "admin_app.department",
+  "pk": 7,
+  "fields": {
+    "school": 3,
+    "name": "Design",
+    "code": "D",
+    "head_name": null,
+    "phone": null,
+    "email": null,
+    "office_location": null,
+    "description": "",
+    "is_active": true,
+    "created_at": "2025-10-21T08:34:27.957Z",
+    "updated_at": "2025-10-21T08:34:27.965Z"
+  }
+},
+{
+  "model": "admin_app.department",
+  "pk": 8,
+  "fields": {
+    "school": 3,
+    "name": "Digital Economy",
+    "code": "DE",
+    "head_name": null,
+    "phone": null,
+    "email": null,
+    "office_location": null,
+    "description": "",
+    "is_active": true,
+    "created_at": "2025-10-21T08:34:27.957Z",
+    "updated_at": "2025-10-21T08:34:27.965Z"
+  }
+},
+{
+  "model": "admin_app.department",
+  "pk": 9,
+  "fields": {
+    "school": 4,
+    "name": "Geological Engineering",
+    "code": "FGE",
+    "head_name": null,
+    "phone": null,
+    "email": null,
+    "office_location": null,
+    "description": "",
+    "is_active": true,
+    "created_at": "2025-10-21T08:36:01.370Z",
+    "updated_at": "2025-10-21T08:36:01.372Z"
+  }
+},
+{
+  "model": "admin_app.department",
+  "pk": 10,
+  "fields": {
+    "school": 4,
+    "name": "Mining",
+    "code": "FM",
+    "head_name": null,
+    "phone": null,
+    "email": null,
+    "office_location": null,
+    "description": "",
+    "is_active": true,
+    "created_at": "2025-10-21T08:36:01.370Z",
+    "updated_at": "2025-10-21T08:36:01.373Z"
+  }
+},
+{
+  "model": "admin_app.department",
+  "pk": 11,
+  "fields": {
+    "school": 4,
+    "name": "Entrepreneurship and Management",
+    "code": "FEM",
+    "head_name": null,
+    "phone": null,
+    "email": null,
+    "office_location": null,
+    "description": "",
+    "is_active": true,
+    "created_at": "2025-10-21T08:36:01.371Z",
+    "updated_at": "2025-10-21T08:36:01.374Z"
+  }
+},
+{
+  "model": "admin_app.department",
+  "pk": 12,
+  "fields": {
+    "school": 5,
+    "name": "Artificial Intelligence",
+    "code": "AI",
+    "head_name": null,
+    "phone": null,
+    "email": null,
+    "office_location": null,
+    "description": "",
+    "is_active": true,
+    "created_at": "2025-10-21T08:37:06.228Z",
+    "updated_at": "2025-10-21T08:37:06.229Z"
+  }
+},
+{
+  "model": "admin_app.department",
+  "pk": 13,
+  "fields": {
+    "school": 5,
+    "name": "Cyber Security",
+    "code": "CS",
+    "head_name": null,
+    "phone": null,
+    "email": null,
+    "office_location": null,
+    "description": "",
+    "is_active": true,
+    "created_at": "2025-10-21T08:37:06.228Z",
+    "updated_at": "2025-10-21T08:37:06.232Z"
+  }
+},
+{
+  "model": "admin_app.department",
+  "pk": 14,
+  "fields": {
+    "school": 5,
+    "name": "Computer Science",
+    "code": "ComSci",
+    "head_name": null,
+    "phone": null,
+    "email": null,
+    "office_location": null,
+    "description": "",
+    "is_active": true,
+    "created_at": "2025-10-21T08:37:59.529Z",
+    "updated_at": "2025-10-21T08:37:59.537Z"
+  }
+},
+{
+  "model": "admin_app.department",
+  "pk": 15,
+  "fields": {
+    "school": 6,
+    "name": "Entrepreneurship and Management",
+    "code": "EM",
+    "head_name": null,
+    "phone": null,
+    "email": null,
+    "office_location": null,
+    "description": "",
+    "is_active": true,
+    "created_at": "2025-10-21T08:39:20.953Z",
+    "updated_at": "2025-10-21T08:39:20.957Z"
+  }
+},
+{
+  "model": "admin_app.department",
+  "pk": 16,
+  "fields": {
+    "school": 6,
+    "name": "International Logistics",
+    "code": "IL",
+    "head_name": null,
+    "phone": null,
+    "email": null,
+    "office_location": null,
+    "description": "",
+    "is_active": true,
+    "created_at": "2025-10-21T08:39:20.953Z",
+    "updated_at": "2025-10-21T08:39:20.959Z"
+  }
+},
+{
+  "model": "admin_app.academicgroup",
+  "pk": 1,
+  "fields": {
+    "school": 5,
+    "department": 12,
+    "group_name": "AI-01-25",
+    "study_year": 1,
+    "semester": 1,
+    "academic_year": "2024-2025",
+    "max_students": 13,
+    "current_students": 1,
+    "group_code": "GE-1S1-AI-",
+    "description": "",
+    "is_active": true,
+    "created_at": "2025-10-21T08:56:34.482Z",
+    "updated_at": "2025-10-22T06:36:01.264Z"
+  }
+},
+{
+  "model": "admin_app.academicgroup",
+  "pk": 2,
+  "fields": {
+    "school": 6,
+    "department": 15,
+    "group_name": "BBA-01-23",
+    "study_year": 3,
+    "semester": 6,
+    "academic_year": "2024-2025",
+    "max_students": 14,
+    "current_students": 0,
+    "group_code": "EM-3S6-BBA",
+    "description": "",
+    "is_active": true,
+    "created_at": "2025-10-21T08:57:36.697Z",
+    "updated_at": "2025-10-21T08:57:36.710Z"
+  }
+},
+{
+  "model": "admin_app.academicgroup",
+  "pk": 3,
+  "fields": {
+    "school": 6,
+    "department": 15,
+    "group_name": "BBA-01-24",
+    "study_year": 2,
+    "semester": 3,
+    "academic_year": "2024-2025",
+    "max_students": 22,
+    "current_students": 0,
+    "group_code": "EM-2S3-BBA",
+    "description": "",
+    "is_active": true,
+    "created_at": "2025-10-21T08:58:45.998Z",
+    "updated_at": "2025-10-21T08:58:46.009Z"
+  }
+},
+{
+  "model": "admin_app.academicgroup",
+  "pk": 4,
+  "fields": {
+    "school": 6,
+    "department": 15,
+    "group_name": "BBA-01-25",
+    "study_year": 1,
+    "semester": 1,
+    "academic_year": "2024-2025",
+    "max_students": 14,
+    "current_students": 0,
+    "group_code": "EM-1S1-BBA",
+    "description": "",
+    "is_active": true,
+    "created_at": "2025-10-21T08:59:31.036Z",
+    "updated_at": "2025-10-21T08:59:31.044Z"
+  }
+},
+{
+  "model": "admin_app.academicgroup",
+  "pk": 5,
+  "fields": {
+    "school": 6,
+    "department": 15,
+    "group_name": "BBA-02-23",
+    "study_year": 3,
+    "semester": 5,
+    "academic_year": "2024-2025",
+    "max_students": 25,
+    "current_students": 0,
+    "group_code": "EM-3S5-BBA",
+    "description": "",
+    "is_active": true,
+    "created_at": "2025-10-21T09:00:22.801Z",
+    "updated_at": "2025-10-21T09:00:22.813Z"
+  }
+},
+{
+  "model": "admin_app.academicgroup",
+  "pk": 6,
+  "fields": {
+    "school": 1,
+    "department": 4,
+    "group_name": "CHE-01-23",
+    "study_year": 3,
+    "semester": 5,
+    "academic_year": "2024-2025",
+    "max_students": 6,
+    "current_students": 0,
+    "group_code": "CHE-3S5-CHE",
+    "description": "",
+    "is_active": true,
+    "created_at": "2025-10-21T09:01:32.839Z",
+    "updated_at": "2025-10-21T09:01:32.850Z"
+  }
+},
+{
+  "model": "admin_app.academicgroup",
+  "pk": 7,
+  "fields": {
+    "school": 5,
+    "department": 14,
+    "group_name": "CS-01-23",
+    "study_year": 3,
+    "semester": 6,
+    "academic_year": "2024-2025",
+    "max_students": 11,
+    "current_students": 0,
+    "group_code": "ComSci-3S6-CS-",
+    "description": "",
+    "is_active": true,
+    "created_at": "2025-10-21T09:02:18.386Z",
+    "updated_at": "2025-10-21T09:02:18.396Z"
+  }
+},
+{
+  "model": "admin_app.academicgroup",
+  "pk": 8,
+  "fields": {
+    "school": 5,
+    "department": 14,
+    "group_name": "CS-01-24",
+    "study_year": 2,
+    "semester": 3,
+    "academic_year": "2024-2025",
+    "max_students": 14,
+    "current_students": 0,
+    "group_code": "ComSci-2S3-CS-",
+    "description": "",
+    "is_active": true,
+    "created_at": "2025-10-21T09:03:03.525Z",
+    "updated_at": "2025-10-21T09:03:03.537Z"
+  }
+},
+{
+  "model": "admin_app.academicgroup",
+  "pk": 9,
+  "fields": {
+    "school": 5,
+    "department": 13,
+    "group_name": "CS-01-25",
+    "study_year": 1,
+    "semester": 1,
+    "academic_year": "2024-2025",
+    "max_students": 22,
+    "current_students": 0,
+    "group_code": "CS-1S1-CS-",
+    "description": "",
+    "is_active": true,
+    "created_at": "2025-10-21T09:03:47.175Z",
+    "updated_at": "2025-10-21T09:03:47.187Z"
+  }
+},
+{
+  "model": "admin_app.academicgroup",
+  "pk": 10,
+  "fields": {
+    "school": 5,
+    "department": 14,
+    "group_name": "CS-02-23",
+    "study_year": 3,
+    "semester": 5,
+    "academic_year": "2024-2025",
+    "max_students": 15,
+    "current_students": 0,
+    "group_code": "ComSci-3S5-CS-",
+    "description": "",
+    "is_active": true,
+    "created_at": "2025-10-21T09:04:30.502Z",
+    "updated_at": "2025-10-21T09:04:30.515Z"
+  }
+},
+{
+  "model": "admin_app.academicgroup",
+  "pk": 11,
+  "fields": {
+    "school": 3,
+    "department": 7,
+    "group_name": "D-01-23",
+    "study_year": 3,
+    "semester": 5,
+    "academic_year": "2024-2025",
+    "max_students": 20,
+    "current_students": 0,
+    "group_code": "D-3S5-D-0",
+    "description": "",
+    "is_active": true,
+    "created_at": "2025-10-21T09:05:17.647Z",
+    "updated_at": "2025-10-21T09:05:17.659Z"
+  }
+},
+{
+  "model": "admin_app.academicgroup",
+  "pk": 12,
+  "fields": {
+    "school": 3,
+    "department": 7,
+    "group_name": "D-01-24",
+    "study_year": 2,
+    "semester": 3,
+    "academic_year": "2024-2025",
+    "max_students": 19,
+    "current_students": 0,
+    "group_code": "D-2S3-D-0",
+    "description": "",
+    "is_active": true,
+    "created_at": "2025-10-21T09:06:58.775Z",
+    "updated_at": "2025-10-21T09:06:58.783Z"
+  }
+},
+{
+  "model": "admin_app.academicgroup",
+  "pk": 13,
+  "fields": {
+    "school": 3,
+    "department": 7,
+    "group_name": "D-01-25",
+    "study_year": 1,
+    "semester": 1,
+    "academic_year": "2024-2025",
+    "max_students": 12,
+    "current_students": 0,
+    "group_code": "D-1S1-D-0",
+    "description": "",
+    "is_active": true,
+    "created_at": "2025-10-21T09:07:41.379Z",
+    "updated_at": "2025-10-21T09:07:41.391Z"
+  }
+},
+{
+  "model": "admin_app.academicgroup",
+  "pk": 14,
+  "fields": {
+    "school": 3,
+    "department": 8,
+    "group_name": "DE-01-23",
+    "study_year": 3,
+    "semester": 5,
+    "academic_year": "2024-2025",
+    "max_students": 17,
+    "current_students": 0,
+    "group_code": "DE-3S5-DE-",
+    "description": "",
+    "is_active": true,
+    "created_at": "2025-10-21T09:08:28.070Z",
+    "updated_at": "2025-10-21T09:08:28.081Z"
+  }
+},
+{
+  "model": "admin_app.academicgroup",
+  "pk": 15,
+  "fields": {
+    "school": 3,
+    "department": 8,
+    "group_name": "DE-01-24",
+    "study_year": 2,
+    "semester": 3,
+    "academic_year": "2024-2025",
+    "max_students": 13,
+    "current_students": 0,
+    "group_code": "DE-2S3-DE-",
+    "description": "",
+    "is_active": true,
+    "created_at": "2025-10-21T09:09:03.023Z",
+    "updated_at": "2025-10-21T09:09:03.032Z"
+  }
+},
+{
+  "model": "admin_app.academicgroup",
+  "pk": 16,
+  "fields": {
+    "school": 3,
+    "department": 8,
+    "group_name": "DE-01-25",
+    "study_year": 1,
+    "semester": 1,
+    "academic_year": "2024-2025",
+    "max_students": 12,
+    "current_students": 0,
+    "group_code": "DE-1S1-DE-",
+    "description": "",
+    "is_active": true,
+    "created_at": "2025-10-21T09:09:38.418Z",
+    "updated_at": "2025-10-21T09:09:38.429Z"
+  }
+},
+{
+  "model": "admin_app.academicgroup",
+  "pk": 17,
+  "fields": {
+    "school": 2,
+    "department": 5,
+    "group_name": "EPE-01-23",
+    "study_year": 2,
+    "semester": 4,
+    "academic_year": "2024-2025",
+    "max_students": 14,
+    "current_students": 0,
+    "group_code": "EPE-2S4-EPE",
+    "description": "",
+    "is_active": true,
+    "created_at": "2025-10-21T09:10:28.591Z",
+    "updated_at": "2025-10-21T09:10:28.603Z"
+  }
+},
+{
+  "model": "admin_app.academicgroup",
+  "pk": 18,
+  "fields": {
+    "school": 2,
+    "department": 5,
+    "group_name": "EPE-01-24",
+    "study_year": 2,
+    "semester": 3,
+    "academic_year": "2024-2025",
+    "max_students": 17,
+    "current_students": 0,
+    "group_code": "EPE-2S3-EPE",
+    "description": "",
+    "is_active": true,
+    "created_at": "2025-10-21T09:11:02.116Z",
+    "updated_at": "2025-10-21T09:11:02.126Z"
+  }
+},
+{
+  "model": "admin_app.academicgroup",
+  "pk": 19,
+  "fields": {
+    "school": 2,
+    "department": 5,
+    "group_name": "EPE-01-25",
+    "study_year": 1,
+    "semester": 1,
+    "academic_year": "2024-2025",
+    "max_students": 22,
+    "current_students": 0,
+    "group_code": "EPE-1S1-EPE",
+    "description": "",
+    "is_active": true,
+    "created_at": "2025-10-21T09:11:45.025Z",
+    "updated_at": "2025-10-21T09:11:45.038Z"
+  }
+},
+{
+  "model": "admin_app.academicgroup",
+  "pk": 20,
+  "fields": {
+    "school": 4,
+    "department": 11,
+    "group_name": "FBBA-01-25",
+    "study_year": 1,
+    "semester": 1,
+    "academic_year": "2024-2025",
+    "max_students": 16,
+    "current_students": 0,
+    "group_code": "FEM-1S1-FBB",
+    "description": "",
+    "is_active": true,
+    "created_at": "2025-10-21T09:12:25.664Z",
+    "updated_at": "2025-10-21T09:12:25.673Z"
+  }
+},
+{
+  "model": "admin_app.academicgroup",
+  "pk": 21,
+  "fields": {
+    "school": 1,
+    "department": 1,
+    "group_name": "GE-01-23",
+    "study_year": 3,
+    "semester": 5,
+    "academic_year": "2024-2025",
+    "max_students": 5,
+    "current_students": 0,
+    "group_code": "GE-3S5-GE-",
+    "description": "",
+    "is_active": true,
+    "created_at": "2025-10-21T09:14:01.716Z",
+    "updated_at": "2025-10-21T09:14:01.726Z"
+  }
+},
+{
+  "model": "admin_app.academicgroup",
+  "pk": 22,
+  "fields": {
+    "school": 6,
+    "department": 16,
+    "group_name": "IL-01-23",
+    "study_year": 3,
+    "semester": 5,
+    "academic_year": "2024-2025",
+    "max_students": 18,
+    "current_students": 0,
+    "group_code": "IL-3S5-IL-",
+    "description": "",
+    "is_active": true,
+    "created_at": "2025-10-21T09:15:02.885Z",
+    "updated_at": "2025-10-21T09:15:02.896Z"
+  }
+},
+{
+  "model": "admin_app.academicgroup",
+  "pk": 23,
+  "fields": {
+    "school": 6,
+    "department": 16,
+    "group_name": "IL-01-24",
+    "study_year": 2,
+    "semester": 3,
+    "academic_year": "2024-2025",
+    "max_students": 13,
+    "current_students": 0,
+    "group_code": "IL-2S3-IL-",
+    "description": "",
+    "is_active": true,
+    "created_at": "2025-10-21T09:15:33.164Z",
+    "updated_at": "2025-10-21T09:15:33.174Z"
+  }
+},
+{
+  "model": "admin_app.academicgroup",
+  "pk": 24,
+  "fields": {
+    "school": 6,
+    "department": 16,
+    "group_name": "IL-01-25",
+    "study_year": 1,
+    "semester": 1,
+    "academic_year": "2024-2025",
+    "max_students": 6,
+    "current_students": 0,
+    "group_code": "IL-1S1-IL-",
+    "description": "",
+    "is_active": true,
+    "created_at": "2025-10-21T09:16:07.414Z",
+    "updated_at": "2025-10-21T09:16:07.424Z"
+  }
+},
+{
+  "model": "admin_app.academicgroup",
+  "pk": 25,
+  "fields": {
+    "school": 1,
+    "department": 2,
+    "group_name": "M-01-23",
+    "study_year": 3,
+    "semester": 5,
+    "academic_year": "2024-2025",
+    "max_students": 5,
+    "current_students": 0,
+    "group_code": "M-3S5-M-0",
+    "description": "",
+    "is_active": true,
+    "created_at": "2025-10-21T09:16:42.001Z",
+    "updated_at": "2025-10-21T09:16:42.014Z"
+  }
+},
+{
+  "model": "admin_app.academicgroup",
+  "pk": 26,
+  "fields": {
+    "school": 1,
+    "department": 2,
+    "group_name": "M-01-24",
+    "study_year": 2,
+    "semester": 3,
+    "academic_year": "2024-2025",
+    "max_students": 20,
+    "current_students": 0,
+    "group_code": "M-2S3-M-0",
+    "description": "",
+    "is_active": true,
+    "created_at": "2025-10-21T09:17:15.940Z",
+    "updated_at": "2025-10-21T09:17:15.952Z"
+  }
+},
+{
+  "model": "admin_app.academicgroup",
+  "pk": 27,
+  "fields": {
+    "school": 1,
+    "department": 3,
+    "group_name": "PE-01-23",
+    "study_year": 3,
+    "semester": 5,
+    "academic_year": "2024-2025",
+    "max_students": 15,
+    "current_students": 0,
+    "group_code": "PE-3S5-PE-",
+    "description": "",
+    "is_active": true,
+    "created_at": "2025-10-21T09:17:56.147Z",
+    "updated_at": "2025-10-21T09:17:56.157Z"
+  }
+},
+{
+  "model": "admin_app.academicgroup",
+  "pk": 28,
+  "fields": {
+    "school": 1,
+    "department": 3,
+    "group_name": "PE-01-24",
+    "study_year": 2,
+    "semester": 3,
+    "academic_year": "2024-2025",
+    "max_students": 34,
+    "current_students": 0,
+    "group_code": "PE-2S3-PE-",
+    "description": "",
+    "is_active": true,
+    "created_at": "2025-10-21T09:18:38.588Z",
+    "updated_at": "2025-10-21T09:18:38.600Z"
+  }
+},
+{
+  "model": "admin_app.academicgroup",
+  "pk": 29,
+  "fields": {
+    "school": 1,
+    "department": 3,
+    "group_name": "PE-01-25",
+    "study_year": 1,
+    "semester": 1,
+    "academic_year": "2024-2025",
+    "max_students": 11,
+    "current_students": 0,
+    "group_code": "PE-1S1-PE-",
+    "description": "",
+    "is_active": true,
+    "created_at": "2025-10-21T09:19:24.823Z",
+    "updated_at": "2025-10-21T09:19:24.834Z"
+  }
+},
+{
+  "model": "admin_app.academicgroup",
+  "pk": 30,
+  "fields": {
+    "school": 3,
+    "department": 6,
+    "group_name": "RE-01-23",
+    "study_year": 3,
+    "semester": 5,
+    "academic_year": "2025-2026",
+    "max_students": 11,
+    "current_students": 0,
+    "group_code": "RE-3S5-RE-",
+    "description": "",
+    "is_active": true,
+    "created_at": "2025-10-21T09:20:01.961Z",
+    "updated_at": "2025-10-21T09:20:01.971Z"
+  }
+},
+{
+  "model": "admin_app.academicgroup",
+  "pk": 31,
+  "fields": {
+    "school": 3,
+    "department": 6,
+    "group_name": "RE-01-24",
+    "study_year": 2,
+    "semester": 3,
+    "academic_year": "2025-2026",
+    "max_students": 11,
+    "current_students": 0,
+    "group_code": "RE-2S3-RE-",
+    "description": "",
+    "is_active": true,
+    "created_at": "2025-10-21T09:20:47.005Z",
+    "updated_at": "2025-10-21T09:20:47.017Z"
+  }
+},
+{
+  "model": "admin_app.tutor",
+  "pk": 1,
+  "fields": {
+    "first_name": "Olimjon",
+    "last_name": "Yalgashev",
+    "username": "olimjon",
+    "password": "yalgashev",
+    "email": "olimjon@outlook.com",
+    "phone_number": null,
+    "date_joined": "2025-10-21T09:44:53.308Z",
+    "last_login": "2025-10-23T09:54:30.495Z",
+    "is_active": true,
+    "created_at": "2025-10-21T09:44:53.308Z",
+    "updated_at": "2025-10-23T06:57:03.425Z",
+    "assigned_groups": [
+      1,
+      7,
+      8,
+      9,
+      10
+    ]
+  }
+},
+{
+  "model": "admin_app.student",
+  "pk": 1,
+  "fields": {
+    "student_id": null,
+    "academic_group": 1,
+    "first_name": "Komron",
+    "last_name": "Xabibov",
+    "middle_name": "Karimovich",
+    "birthday": null,
+    "gender": null,
+    "nation": "uzbek",
+    "id_card": "AD4843147",
+    "home_address": "",
+    "phone_number": null,
+    "email": null,
+    "telegram_username": null,
+    "marital_status": "single",
+    "is_from_large_family": false,
+    "is_from_low_income_family": false,
+    "is_from_troubled_family": false,
+    "are_parents_deceased": false,
+    "are_parents_divorced": false,
+    "is_father_deceased": false,
+    "is_mother_deceased": false,
+    "has_disability": false,
+    "father_first_name": null,
+    "father_last_name": null,
+    "father_middle_name": null,
+    "father_phone_number": null,
+    "father_telegram_username": null,
+    "is_father_retired": false,
+    "is_father_disabled": false,
+    "mother_first_name": null,
+    "mother_last_name": null,
+    "mother_middle_name": null,
+    "mother_phone_number": null,
+    "mother_telegram_username": null,
+    "is_mother_retired": false,
+    "is_mother_disabled": false,
+    "siblings_count": 0,
+    "children_count": 0,
+    "guardian_name": null,
+    "guardian_phone_number": null,
+    "hobbies": null,
+    "special_skills": null,
+    "languages_spoken": null,
+    "photo": "student_photos/2e0bf7f8851a140dc4838f4b175e5b60.jpg",
+    "username": "AD4843147",
+    "password": "pbkdf2_sha256$600000$5X1hHeBwU9e8T7dx5Rjr2x$OwRoISIFXQILq4kHmDSNmL2JwRPAgtHCr1p158sCDkI=",
+    "last_login": "2025-10-23T07:32:23.383Z",
+    "is_active": true,
+    "created_at": "2025-10-22T06:28:55.842Z",
+    "updated_at": "2025-10-23T07:17:18.897Z"
+  }
+}
+]

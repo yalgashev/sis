@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Additional Information - SIS Student</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#667eea',
+                        secondary: '#764ba2',
+                        sidebar: '#1f2937',
+                        sidebarHover: '#374151',
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .sidebar-item:hover { background-color: #374151; }
+        .sidebar-item.active { background-color: #667eea; }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div class="flex h-screen">
+        <!-- Sidebar -->
+        <div class="w-64 bg-sidebar text-white flex flex-col">
+            <!-- Logo Section -->
+            <div class="p-6 border-b border-gray-600">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
+                        <i class="fas fa-user-graduate text-white text-xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-bold">SIS Student</h1>
+                        <p class="text-gray-400 text-sm">{{ student_name }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Navigation Menu -->
+            <nav class="flex-1 p-4">
+                <ul class="space-y-2">
+                    <li>
+                        <a href="{% url 'students:dashboard' %}" class="sidebar-item flex items-center px-4 py-3 rounded-lg transition-colors">
+                            <i class="fas fa-tachometer-alt mr-3"></i>
+                            Dashboard
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'students:general' %}" class="sidebar-item flex items-center px-4 py-3 rounded-lg transition-colors">
+                            <i class="fas fa-info-circle mr-3"></i>
+                            General
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'students:personal_data' %}" class="sidebar-item flex items-center px-4 py-3 rounded-lg transition-colors">
+                            <i class="fas fa-user mr-3"></i>
+                            Personal Data
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'students:contact_info' %}" class="sidebar-item flex items-center px-4 py-3 rounded-lg transition-colors">
+                            <i class="fas fa-phone mr-3"></i>
+                            Contact Information
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'students:family_info' %}" class="sidebar-item flex items-center px-4 py-3 rounded-lg transition-colors">
+                            <i class="fas fa-home mr-3"></i>
+                            Family Information
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'students:additional_info' %}" class="sidebar-item flex items-center px-4 py-3 rounded-lg transition-colors active">
+                            <i class="fas fa-plus-circle mr-3"></i>
+                            Additional Information
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'students:change_password' %}" class="sidebar-item flex items-center px-4 py-3 rounded-lg transition-colors">
+                            <i class="fas fa-key mr-3"></i>
+                            Change Password
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+
+            <!-- Logout Button -->
+            <div class="p-4 border-t border-gray-600">
+                <a href="{% url 'students:logout' %}" class="sidebar-item flex items-center px-4 py-3 rounded-lg transition-colors text-red-300 hover:bg-red-900">
+                    <i class="fas fa-sign-out-alt mr-3"></i>
+                    Logout
+                </a>
+            </div>
+        </div>
+
+        <!-- Main Content Area -->
+        <div class="flex-1 flex flex-col overflow-hidden">
+            <!-- Top Header -->
+            <header class="bg-white shadow-sm border-b border-gray-200 px-6 py-4">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h2 class="text-2xl font-bold text-gray-900">Personal Interests & Skills</h2>
+                        <p class="text-gray-600">Share your hobbies, skills, and languages</p>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <span class="text-sm text-gray-500">ID: {{ student_username }}</span>
+                        <div class="w-10 h-10 bg-primary rounded-full flex items-center justify-center">
+                            <span class="text-white font-medium">{{ student_name|first }}</span>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Content Area -->
+            <main class="flex-1 p-6 overflow-y-auto">
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="mb-6 p-4 rounded-lg {% if message.tags == 'success' %}bg-green-100 text-green-800 border border-green-200{% elif message.tags == 'error' %}bg-red-100 text-red-800 border border-red-200{% else %}bg-blue-100 text-blue-800 border border-blue-200{% endif %}">
+                            <i class="fas fa-{% if message.tags == 'success' %}check-circle{% elif message.tags == 'error' %}exclamation-circle{% else %}info-circle{% endif %} mr-2"></i>
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+
+                <!-- Additional Information Form -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-100">
+                    <div class="p-6 border-b border-gray-200">
+                        <h3 class="text-lg font-semibold text-gray-900 flex items-center">
+                            <i class="fas fa-heart mr-3 text-primary"></i>
+                            Personal Interests & Skills
+                        </h3>
+                        <p class="text-gray-600 mt-2">Tell us about your hobbies, skills, and languages to help us know you better.</p>
+                    </div>
+
+                    <div class="p-6">
+                        <form method="post" class="space-y-8">
+                            {% csrf_token %}
+
+                            <!-- Personal Interests & Skills -->
+                            <div class="bg-purple-50 border border-purple-200 rounded-lg p-6">
+                                <h4 class="text-lg font-semibold text-purple-900 mb-6 flex items-center">
+                                    <i class="fas fa-star mr-2 text-purple-600"></i>
+                                    Your Interests & Abilities
+                                </h4>
+                                
+                                <div class="space-y-6">
+                                    <!-- Hobbies -->
+                                    <div>
+                                        <label class="block text-sm font-medium text-purple-700 mb-2">
+                                            <i class="fas fa-gamepad mr-1"></i>
+                                            Hobbies & Interests
+                                        </label>
+                                        {{ form.hobbies }}
+                                        {% if form.hobbies.errors %}
+                                            <div class="mt-1 text-sm text-red-600">{{ form.hobbies.errors }}</div>
+                                        {% endif %}
+                                        <p class="text-xs text-purple-600 mt-1">Select your main hobby from the list</p>
+                                    </div>
+
+                                    <!-- Other Hobby Input -->
+                                    <div id="hobbies-other-section" style="display: none;">
+                                        <label class="block text-sm font-medium text-purple-700 mb-2">
+                                            <i class="fas fa-edit mr-1"></i>
+                                            Please specify your hobby:
+                                        </label>
+                                        {{ form.hobbies_other }}
+                                        {% if form.hobbies_other.errors %}
+                                            <div class="mt-1 text-sm text-red-600">{{ form.hobbies_other.errors }}</div>
+                                        {% endif %}
+                                        <p class="text-xs text-purple-600 mt-1">Describe your hobby in detail</p>
+                                    </div>
+
+                                    <!-- Special Skills -->
+                                    <div>
+                                        <label class="block text-sm font-medium text-purple-700 mb-2">
+                                            <i class="fas fa-medal mr-1"></i>
+                                            Special Skills & Talents
+                                        </label>
+                                        {{ form.special_skills }}
+                                        {% if form.special_skills.errors %}
+                                            <div class="mt-1 text-sm text-red-600">{{ form.special_skills.errors }}</div>
+                                        {% endif %}
+                                        <p class="text-xs text-purple-600 mt-1">Select your main skill from the list</p>
+                                    </div>
+
+                                    <!-- Other Skills Input -->
+                                    <div id="skills-other-section" style="display: none;">
+                                        <label class="block text-sm font-medium text-purple-700 mb-2">
+                                            <i class="fas fa-edit mr-1"></i>
+                                            Please specify your skill:
+                                        </label>
+                                        {{ form.special_skills_other }}
+                                        {% if form.special_skills_other.errors %}
+                                            <div class="mt-1 text-sm text-red-600">{{ form.special_skills_other.errors }}</div>
+                                        {% endif %}
+                                        <p class="text-xs text-purple-600 mt-1">Describe your special skill or talent</p>
+                                    </div>
+
+                                    <!-- Languages -->
+                                    <div>
+                                        <label class="block text-sm font-medium text-purple-700 mb-2">
+                                            <i class="fas fa-language mr-1"></i>
+                                            Languages Spoken
+                                        </label>
+                                        {{ form.languages_spoken }}
+                                        {% if form.languages_spoken.errors %}
+                                            <div class="mt-1 text-sm text-red-600">{{ form.languages_spoken.errors }}</div>
+                                        {% endif %}
+                                        <p class="text-xs text-purple-600 mt-1">Select languages common in Central Asia</p>
+                                    </div>
+
+                                    <!-- Other Language Input -->
+                                    <div id="languages-other-section" style="display: none;">
+                                        <label class="block text-sm font-medium text-purple-700 mb-2">
+                                            <i class="fas fa-edit mr-1"></i>
+                                            Please specify the language and proficiency level:
+                                        </label>
+                                        {{ form.languages_spoken_other }}
+                                        {% if form.languages_spoken_other.errors %}
+                                            <div class="mt-1 text-sm text-red-600">{{ form.languages_spoken_other.errors }}</div>
+                                        {% endif %}
+                                        <p class="text-xs text-purple-600 mt-1">Example: German - Intermediate, Japanese - Basic</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Information Notice -->
+                            <div class="bg-blue-50 border border-blue-200 rounded-lg p-6">
+                                <h4 class="text-lg font-semibold text-blue-900 mb-3 flex items-center">
+                                    <i class="fas fa-info-circle mr-2 text-blue-600"></i>
+                                    Why This Information Helps
+                                </h4>
+                                <ul class="text-sm text-blue-800 space-y-2">
+                                    <li class="flex items-start">
+                                        <i class="fas fa-check-circle mr-2 mt-0.5 text-blue-600"></i>
+                                        Helps us understand your interests and match you with relevant activities
+                                    </li>
+                                    <li class="flex items-start">
+                                        <i class="fas fa-check-circle mr-2 mt-0.5 text-blue-600"></i>
+                                        Allows us to connect you with students who share similar interests
+                                    </li>
+                                    <li class="flex items-start">
+                                        <i class="fas fa-check-circle mr-2 mt-0.5 text-blue-600"></i>
+                                        Helps in organizing clubs, events, and extracurricular activities
+                                    </li>
+                                    <li class="flex items-start">
+                                        <i class="fas fa-check-circle mr-2 mt-0.5 text-blue-600"></i>
+                                        Language skills help in academic and social support programs
+                                    </li>
+                                </ul>
+                            </div>
+
+                            <!-- Form Actions -->
+                            <div class="pt-6 border-t border-gray-200">
+                                <div class="flex items-center justify-between">
+                                    <a href="{% url 'students:dashboard' %}" 
+                                       class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">
+                                        <i class="fas fa-arrow-left mr-2"></i>
+                                        Back to Dashboard
+                                    </a>
+                                    <button type="submit" 
+                                            class="px-6 py-2 bg-primary text-white rounded-lg hover:bg-blue-600 transition-colors">
+                                        <i class="fas fa-save mr-2"></i>
+                                        Save Information
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script>
+        // Style form inputs
+        document.addEventListener('DOMContentLoaded', function() {
+            const inputs = document.querySelectorAll('input, select, textarea');
+            inputs.forEach(input => {
+                if (input.tagName.toLowerCase() === 'select') {
+                    input.className = 'mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary';
+                } else if (input.tagName.toLowerCase() === 'textarea') {
+                    input.className = 'mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary focus:border-primary resize-vertical min-h-[80px]';
+                } else if (input.type !== 'checkbox') {
+                    input.className = 'mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary focus:border-primary';
+                }
+                
+                // Add error styling
+                if (input.parentNode.querySelector('.text-red-600')) {
+                    input.classList.add('border-red-300', 'focus:ring-red-500', 'focus:border-red-500');
+                }
+            });
+
+            // Handle "Other" option visibility
+            const hobbiesSelect = document.querySelector('select[name="hobbies"]');
+            const hobbiesOtherSection = document.getElementById('hobbies-other-section');
+            
+            const skillsSelect = document.querySelector('select[name="special_skills"]');
+            const skillsOtherSection = document.getElementById('skills-other-section');
+            
+            const languagesSelect = document.querySelector('select[name="languages_spoken"]');
+            const languagesOtherSection = document.getElementById('languages-other-section');
+
+            function toggleOtherSection(selectElement, otherSection) {
+                if (selectElement && otherSection) {
+                    selectElement.addEventListener('change', function() {
+                        if (this.value === 'other') {
+                            otherSection.style.display = 'block';
+                        } else {
+                            otherSection.style.display = 'none';
+                        }
+                    });
+                    
+                    // Initial check
+                    if (selectElement.value === 'other') {
+                        otherSection.style.display = 'block';
+                    }
+                }
+            }
+
+            toggleOtherSection(hobbiesSelect, hobbiesOtherSection);
+            toggleOtherSection(skillsSelect, skillsOtherSection);
+            toggleOtherSection(languagesSelect, languagesOtherSection);
+        });
+    </script>
+</body>
+</html>

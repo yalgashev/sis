@@ -1,0 +1,259 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Schools Management - SIS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#667eea',
+                        secondary: '#764ba2',
+                        sidebar: '#1f2937',
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div class="flex h-screen">
+        <!-- Sidebar -->
+        <div class="w-64 bg-sidebar text-white flex flex-col">
+            <!-- Logo Section -->
+            <div class="p-6 border-b border-gray-600">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-gradient-to-br from-primary to-secondary rounded-lg flex items-center justify-center">
+                        <i class="fas fa-graduation-cap text-white text-lg"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-bold">SIS Admin</h1>
+                        <p class="text-gray-400 text-sm">Management Panel</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Navigation Menu -->
+            <nav class="flex-1 p-4">
+                <ul class="space-y-2">
+                    <li>
+                        <a href="{% url 'dashboard' %}" class="flex items-center space-x-3 p-3 rounded-lg transition-colors hover:bg-gray-700">
+                            <i class="fas fa-tachometer-alt w-5"></i>
+                            <span>General</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'schools_list' %}" class="flex items-center space-x-3 p-3 rounded-lg transition-colors bg-primary">
+                            <i class="fas fa-school w-5"></i>
+                            <span>Schools</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'academic_groups_list' %}" class="flex items-center space-x-3 p-3 rounded-lg transition-colors hover:bg-gray-700">
+                            <i class="fas fa-users w-5"></i>
+                            <span>Academic Groups</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'tutors_list' %}" class="flex items-center space-x-3 p-3 rounded-lg transition-colors hover:bg-gray-700">
+                            <i class="fas fa-chalkboard-teacher w-5"></i>
+                            <span>Tutors</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'settings' %}" class="flex items-center space-x-3 p-3 rounded-lg transition-colors hover:bg-gray-700">
+                            <i class="fas fa-cog w-5"></i>
+                            <span>Settings</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+
+            <!-- User Profile Section -->
+            <div class="p-4 border-t border-gray-600">
+                <div class="flex items-center space-x-3 mb-4">
+                    <div class="w-10 h-10 bg-primary rounded-full flex items-center justify-center">
+                        <i class="fas fa-user text-white"></i>
+                    </div>
+                    <div class="flex-1">
+                        <p class="text-sm font-medium">{{ admin_name }}</p>
+                        <p class="text-xs text-gray-400">
+                            {% if is_super_admin %}Super Admin{% else %}Admin{% endif %}
+                        </p>
+                    </div>
+                </div>
+                <a href="{% url 'logout' %}" class="flex items-center space-x-2 text-gray-300 hover:text-white p-2 rounded-lg hover:bg-gray-700 transition-colors">
+                    <i class="fas fa-sign-out-alt text-sm"></i>
+                    <span class="text-sm">Sign out</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- Main Content Area -->
+        <div class="flex-1 flex flex-col">
+            <!-- Top Header -->
+            <header class="bg-white shadow-sm border-b border-gray-200 px-6 py-4">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h2 class="text-2xl font-bold text-gray-900">Schools Management</h2>
+                        <p class="text-gray-600">Manage educational institutions and their departments</p>
+                    </div>
+                    <a href="{% url 'add_school' %}" class="bg-primary text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors font-medium">
+                        <i class="fas fa-plus mr-2"></i>Add School
+                    </a>
+                </div>
+            </header>
+
+            <!-- Content Area -->
+            <main class="flex-1 p-6 overflow-y-auto">
+                <!-- Schools Grid -->
+                {% if schools %}
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {% for school in schools %}
+                            <div class="bg-white rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+                                <div class="p-6">
+                                    <div class="flex items-start justify-between mb-4">
+                                        <div class="flex-1">
+                                            <h3 class="text-lg font-semibold text-gray-900 mb-1">{{ school.name }}</h3>
+                                            <p class="text-sm text-gray-500 mb-2">Code: {{ school.code }}</p>
+                                            {% if school.description %}
+                                                <p class="text-sm text-gray-600 line-clamp-2">{{ school.description|truncatewords:20 }}</p>
+                                            {% endif %}
+                                        </div>
+                                        <div class="flex space-x-2">
+                                            <a href="{% url 'edit_school' school.id %}" class="p-2 text-gray-400 hover:text-primary transition-colors">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            <button onclick="confirmDelete({{ school.id }}, '{{ school.name }}')" class="p-2 text-gray-400 hover:text-red-600 transition-colors">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- School Info -->
+                                    <div class="space-y-2 mb-4">
+                                        {% if school.phone %}
+                                            <div class="flex items-center text-sm text-gray-600">
+                                                <i class="fas fa-phone w-4 mr-2"></i>
+                                                <span>{{ school.phone }}</span>
+                                            </div>
+                                        {% endif %}
+                                        {% if school.email %}
+                                            <div class="flex items-center text-sm text-gray-600">
+                                                <i class="fas fa-envelope w-4 mr-2"></i>
+                                                <span>{{ school.email }}</span>
+                                            </div>
+                                        {% endif %}
+                                        {% if school.established_date %}
+                                            <div class="flex items-center text-sm text-gray-600">
+                                                <i class="fas fa-calendar w-4 mr-2"></i>
+                                                <span>Est. {{ school.established_date|date:"Y" }}</span>
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                    
+                                    <!-- Department Count and Status -->
+                                    <div class="flex items-center justify-between pt-4 border-t border-gray-100">
+                                        <div class="flex items-center text-sm text-gray-600">
+                                            <i class="fas fa-sitemap mr-2"></i>
+                                            <span>{{ school.get_departments_count }} Department{{ school.get_departments_count|pluralize }}</span>
+                                        </div>
+                                        <span class="px-2 py-1 text-xs rounded-full {% if school.is_active %}bg-green-100 text-green-800{% else %}bg-red-100 text-red-800{% endif %}">
+                                            {% if school.is_active %}Active{% else %}Inactive{% endif %}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <!-- Empty State -->
+                    <div class="text-center py-12">
+                        <div class="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-school text-gray-400 text-3xl"></i>
+                        </div>
+                        <h3 class="text-xl font-medium text-gray-900 mb-2">No Schools Found</h3>
+                        <p class="text-gray-600 mb-6">Get started by adding your first educational institution.</p>
+                        <a href="{% url 'add_school' %}" class="bg-primary text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors font-medium">
+                            <i class="fas fa-plus mr-2"></i>Add First School
+                        </a>
+                    </div>
+                {% endif %}
+            </main>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div id="deleteModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden z-50">
+        <div class="flex items-center justify-center min-h-screen px-4">
+            <div class="bg-white rounded-lg max-w-md w-full p-6">
+                <div class="flex items-center mb-4">
+                    <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mr-4">
+                        <i class="fas fa-exclamation-triangle text-red-600 text-xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-900">Delete School</h3>
+                        <p class="text-sm text-gray-600">This action cannot be undone</p>
+                    </div>
+                </div>
+                <p class="text-gray-700 mb-6">Are you sure you want to delete <strong id="schoolName"></strong>? This will also delete all associated departments.</p>
+                <div class="flex space-x-4">
+                    <button onclick="closeDeleteModal()" class="flex-1 bg-gray-200 text-gray-800 py-2 px-4 rounded-lg hover:bg-gray-300 transition-colors">
+                        Cancel
+                    </button>
+                    <form id="deleteForm" method="post" class="flex-1">
+                        {% csrf_token %}
+                        <button type="submit" class="w-full bg-red-600 text-white py-2 px-4 rounded-lg hover:bg-red-700 transition-colors">
+                            Delete
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Django Messages -->
+    {% if messages %}
+        <div class="fixed top-4 right-4 space-y-2 z-40">
+            {% for message in messages %}
+                <div class="{% if message.tags == 'success' %}bg-green-500{% elif message.tags == 'error' %}bg-red-500{% else %}bg-blue-500{% endif %} text-white px-6 py-3 rounded-lg shadow-lg transform transition-all duration-300">
+                    <div class="flex items-center">
+                        <i class="fas {% if message.tags == 'success' %}fa-check-circle{% elif message.tags == 'error' %}fa-exclamation-circle{% else %}fa-info-circle{% endif %} mr-2"></i>
+                        <span>{{ message }}</span>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <script>
+        function confirmDelete(schoolId, schoolName) {
+            document.getElementById('schoolName').textContent = schoolName;
+            document.getElementById('deleteForm').action = `/schools/delete/${schoolId}/`;
+            document.getElementById('deleteModal').classList.remove('hidden');
+        }
+
+        function closeDeleteModal() {
+            document.getElementById('deleteModal').classList.add('hidden');
+        }
+
+        // Auto-hide messages after 5 seconds
+        setTimeout(() => {
+            const messages = document.querySelectorAll('[class*="bg-green-500"], [class*="bg-red-500"], [class*="bg-blue-500"]');
+            messages.forEach(message => {
+                message.style.transform = 'translateX(100%)';
+                setTimeout(() => message.remove(), 300);
+            });
+        }, 5000);
+    </script>
+</body>
+</html>
