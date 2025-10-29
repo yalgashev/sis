@@ -43,4 +43,4 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
     CMD curl -f http://localhost:8000/ || exit 1
 
 # Use gunicorn for production
-CMD ["sh", "-c", "python manage.py migrate && gunicorn --bind 0.0.0.0:8000 --workers 3 --timeout 120 sis.wsgi:application"]
+CMD ["sh", "-c", "python manage.py migrate && python manage.py ensure_default_admin && gunicorn --bind 0.0.0.0:8000 --workers 3 --timeout 120 sis.wsgi:application"]

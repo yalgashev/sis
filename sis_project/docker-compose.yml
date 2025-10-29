@@ -5,10 +5,9 @@ services:
   db:
     image: postgres:15-alpine
     container_name: sis_database
+    env_file:
+      - ./.env
     environment:
-      POSTGRES_DB: sis
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: sis_secure_password_2024
       POSTGRES_INITDB_ARGS: "--encoding=UTF8 --lc-collate=C --lc-ctype=C"
     volumes:
       - postgres_data:/var/lib/postgresql/data
@@ -33,15 +32,8 @@ services:
     depends_on:
       db:
         condition: service_healthy
-    environment:
-      - DEBUG=0  # Production mode
-      - ALLOWED_HOSTS=*  # Configure for your domain
-      - POSTGRES_DB=sis
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=123456789
-      - DB_HOST=db
-      - DB_PORT=5432
-      - SECRET_KEY=your-very-secure-secret-key-here-change-this-in-production
+    env_file:
+      - ./.env
     volumes:
       - media_files:/app/media        # Persistent media files
       - static_files:/app/staticfiles # Static files (collected)
@@ -72,12 +64,14 @@ services:
   redis:
     image: redis:7-alpine
     container_name: sis_redis
+    env_file:
+      - ./.env
     volumes:
       - redis_data:/data
     networks:
       - sis-network
     restart: unless-stopped
-    command: redis-server --appendonly yes --requirepass redis_password_2024
+    command: ["redis-server", "--appendonly", "yes", "--requirepass", "${REDIS_PASSWORD}"]
 
 # Named volumes for data persistence
 volumes:
