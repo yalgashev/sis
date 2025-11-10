@@ -19,6 +19,7 @@ urlpatterns = [
     
     # Export/Reports URLs
     path('reports/', views.tutor_reports_view, name='reports'),
+    path('export/filtered-students/', views.export_filtered_students, name='export_filtered_students'),
     path('export/students-info/', views.export_students_info, name='export_students_info'),
     path('export/parents-info/', views.export_parents_info, name='export_parents_info'),
     path('export/social-status/', views.export_social_status, name='export_social_status'),

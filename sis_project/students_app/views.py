@@ -1,12 +1,22 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.utils import timezone
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_POST
+import json
+import sys
+import os
 from admin_app.models import Student
 from .forms import (
     StudentPersonalDataForm, StudentContactInfoForm, 
     StudentFamilyInfoForm, StudentAdditionalInfoForm,
     StudentPasswordChangeForm
 )
+
+# Add project root to path for importing code_content
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from code_content import get_code_content
 
 
 def student_dashboard_view(request):
@@ -293,3 +303,64 @@ def get_completion_stats(student):
         'completed_fields': completed_fields,
         'completion_percentage': round(completion_percentage, 1)
     }
+
+
+def student_code_of_conduct_view(request):
+    """Code of Ethical Conduct page"""
+    if 'student_id' not in request.session:
+        messages.error(request, 'Please log in to access this page.')
+        return redirect('login')
+    
+    try:
+        student = Student.objects.get(id=request.session['student_id'])
+    except Student.DoesNotExist:
+        messages.error(request, 'Student not found. Please log in again.')
+        return redirect('login')
+    
+    # Get code content from external file
+    code_content = get_code_content()
+    
+    context = {
+        'student_name': request.session.get('student_name'),
+        'student_username': request.session.get('student_username'),
+        'student': student,
+        'code_content': code_content,
+        'already_agreed': student.agreed_to_code_of_conduct,
+        'agreement_date': student.code_agreement_date,
+    }
+    
+    return render(request, 'students/code_of_conduct.html', context)
+
+
+@csrf_exempt
+@require_POST
+def agree_to_code_of_conduct(request):
+    """Handle agreement to code of conduct via AJAX"""
+    if 'student_id' not in request.session:
+        return JsonResponse({'success': False, 'error': 'Not logged in'})
+    
+    try:
+        student = Student.objects.get(id=request.session['student_id'])
+        
+        # Check if already agreed
+        if student.agreed_to_code_of_conduct:
+            return JsonResponse({
+                'success': False, 
+                'error': 'You have already agreed to the code of conduct'
+            })
+        
+        # Update student record
+        student.agreed_to_code_of_conduct = True
+        student.code_agreement_date = timezone.now()
+        student.save()
+        
+        return JsonResponse({
+            'success': True, 
+            'message': 'Thank you for agreeing to the Code of Ethical Conduct',
+            'agreement_date': student.code_agreement_date.strftime('%B %d, %Y at %I:%M %p')
+        })
+        
+    except Student.DoesNotExist:
+        return JsonResponse({'success': False, 'error': 'Student not found'})
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)})

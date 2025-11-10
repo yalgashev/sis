@@ -7,9 +7,12 @@ from django.db import transaction
 from django.core.paginator import Paginator
 from admin_app.models import Tutor, AcademicGroup, Student
 from .forms import TutorProfileForm, TutorPasswordChangeForm, StudentForm
+from .filters import AdvancedStudentFilter, QuickStudentFilter
 import json
 import openpyxl
-from openpyxl.styles import Font, PatternFill, Alignment
+from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
+from openpyxl.utils.dataframe import dataframe_to_rows
+import pandas as pd
 from datetime import datetime
 
 
@@ -387,7 +390,7 @@ def tutor_delete_student_view(request, student_id):
 
 
 def tutor_reports_view(request):
-    """Display reports page with export options"""
+    """Advanced reports page with filtering and export functionality"""
     # Check if tutor is logged in
     if 'tutor_id' not in request.session:
         messages.error(request, 'Please log in to access this page.')
@@ -400,26 +403,296 @@ def tutor_reports_view(request):
         messages.error(request, 'Tutor not found. Please log in again.')
         return redirect('login')
     
-    # Get statistics
+    # Get all students from tutor's assigned groups
     assigned_groups = tutor.assigned_groups.filter(is_active=True)
-    total_students = sum(group.current_students for group in assigned_groups)
+    students_queryset = Student.objects.filter(
+        academic_group__in=assigned_groups
+    ).select_related(
+        'academic_group',
+        'academic_group__department',
+        'academic_group__school'
+    ).order_by('last_name', 'first_name')
+    
+    # Apply filters
+    filter_type = request.GET.get('filter_type', 'quick')
+    
+    if filter_type == 'advanced':
+        student_filter = AdvancedStudentFilter(
+            request.GET, 
+            queryset=students_queryset,
+            assigned_groups=assigned_groups
+        )
+    else:
+        student_filter = QuickStudentFilter(
+            request.GET, 
+            queryset=students_queryset,
+            assigned_groups=assigned_groups
+        )
+    
+    filtered_students = student_filter.qs
+    
+    # Pagination
+    page_size = request.GET.get('page_size', '25')
+    try:
+        page_size = int(page_size)
+        if page_size not in [10, 25, 50, 100]:
+            page_size = 25
+    except ValueError:
+        page_size = 25
+    
+    paginator = Paginator(filtered_students, page_size)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    # Statistics
+    total_students = filtered_students.count()
+    total_groups = assigned_groups.count()
+    
+    # Gender statistics
+    gender_stats = {
+        'male': filtered_students.filter(gender='male').count(),
+        'female': filtered_students.filter(gender='female').count(),
+        'not_specified': filtered_students.filter(gender__isnull=True).count() + filtered_students.filter(gender='').count()
+    }
+    
+    # Family status statistics
+    family_stats = {
+        'large_family': filtered_students.filter(is_from_large_family=True).count(),
+        'low_income': filtered_students.filter(is_from_low_income_family=True).count(),
+        'troubled_family': filtered_students.filter(is_from_troubled_family=True).count(),
+        'parents_deceased': filtered_students.filter(are_parents_deceased=True).count(),
+        'parents_divorced': filtered_students.filter(are_parents_divorced=True).count(),
+        'has_disability': filtered_students.filter(has_disability=True).count(),
+    }
+    
+    # Code of conduct statistics
+    code_stats = {
+        'agreed': filtered_students.filter(agreed_to_code_of_conduct=True).count(),
+        'not_agreed': filtered_students.filter(agreed_to_code_of_conduct=False).count(),
+    }
     
     context = {
         'tutor_name': request.session.get('tutor_name'),
         'tutor_username': request.session.get('tutor_username'),
         'tutor': tutor,
+        'filter': student_filter,
+        'students': page_obj,
+        'filter_type': filter_type,
         'total_students': total_students,
-        'total_groups': assigned_groups.count(),
+        'total_groups': total_groups,
+        'gender_stats': gender_stats,
+        'family_stats': family_stats,
+        'code_stats': code_stats,
+        'page_size': page_size,
+        'page_sizes': [10, 25, 50, 100],
+        'current_filters': request.GET.urlencode(),
     }
     
-    return render(request, 'tutors/reports.html', context)
+    return render(request, 'tutors/advanced_reports.html', context)
 
 
-def export_students_info(request):
-    """Export TALABALAR TO'G'RISIDA MA'LUMOT (Student Information)"""
+def export_filtered_students(request):
+    """Export filtered students to Excel with all information"""
     if 'tutor_id' not in request.session:
         messages.error(request, 'Please log in to access this page.')
         return redirect('login')
+    
+    try:
+        tutor = Tutor.objects.get(id=request.session['tutor_id'])
+        assigned_groups = tutor.assigned_groups.filter(is_active=True)
+        
+        # Get the same filtered queryset as in reports view
+        students_queryset = Student.objects.filter(
+            academic_group__in=assigned_groups
+        ).select_related(
+            'academic_group',
+            'academic_group__department',
+            'academic_group__school'
+        ).order_by('last_name', 'first_name')
+        
+        # Apply the same filters
+        filter_type = request.GET.get('filter_type', 'quick')
+        if filter_type == 'advanced':
+            student_filter = AdvancedStudentFilter(
+                request.GET, 
+                queryset=students_queryset,
+                assigned_groups=assigned_groups
+            )
+        else:
+            student_filter = QuickStudentFilter(
+                request.GET, 
+                queryset=students_queryset,
+                assigned_groups=assigned_groups
+            )
+        
+        students = student_filter.qs
+        
+        # Create workbook
+        wb = openpyxl.Workbook()
+        ws = wb.active
+        ws.title = "Student Report"
+        
+        # Define comprehensive headers
+        headers = [
+            "No.", "Student ID", "Full Name", "First Name", "Last Name", "Middle Name",
+            "Birthday", "Age", "Gender", "Nation", "ID Card", "Phone", "Email", "Telegram",
+            "Home Address", "Marital Status", "Group", "Department", "Study Year", "Semester",
+            "Large Family", "Low Income", "Troubled Family", "Parents Deceased", "Parents Divorced",
+            "Father Deceased", "Mother Deceased", "Has Disability", "Father Name", "Father Phone",
+            "Father Retired", "Father Disabled", "Mother Name", "Mother Phone", "Mother Retired",
+            "Mother Disabled", "Siblings Count", "Children Count", "Guardian Name", "Guardian Phone",
+            "Hobbies", "Special Skills", "Languages", "Code Agreement", "Agreement Date",
+            "Active", "Created Date", "Last Updated"
+        ]
+        
+        # Style headers
+        header_font = Font(bold=True, color="FFFFFF", size=11)
+        header_fill = PatternFill(start_color="366092", end_color="366092", fill_type="solid")
+        header_alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
+        border = Border(
+            left=Side(style='thin'),
+            right=Side(style='thin'),
+            top=Side(style='thin'),
+            bottom=Side(style='thin')
+        )
+        
+        # Apply header styles
+        for col_num, header in enumerate(headers, 1):
+            cell = ws.cell(row=1, column=col_num, value=header)
+            cell.font = header_font
+            cell.fill = header_fill
+            cell.alignment = header_alignment
+            cell.border = border
+        
+        # Add data rows
+        for row_num, student in enumerate(students, 2):
+            # Calculate age
+            age = student.get_age() if student.birthday else "N/A"
+            
+            # Father full name
+            father_name = ""
+            if student.father_first_name or student.father_last_name:
+                father_parts = [student.father_first_name, student.father_middle_name, student.father_last_name]
+                father_name = " ".join([part for part in father_parts if part])
+            
+            # Mother full name
+            mother_name = ""
+            if student.mother_first_name or student.mother_last_name:
+                mother_parts = [student.mother_first_name, student.mother_middle_name, student.mother_last_name]
+                mother_name = " ".join([part for part in mother_parts if part])
+            
+            row_data = [
+                row_num - 1,  # No.
+                student.student_id or "N/A",
+                student.get_full_name(),
+                student.first_name,
+                student.last_name,
+                student.middle_name or "",
+                student.birthday.strftime("%Y-%m-%d") if student.birthday else "N/A",
+                age,
+                student.get_gender_display() if student.gender else "N/A",
+                student.get_nation_display() if student.nation else "N/A",
+                student.id_card or "N/A",
+                student.phone_number or "N/A",
+                student.email or "N/A",
+                student.telegram_username or "N/A",
+                student.home_address or "N/A",
+                student.get_marital_status_display() if student.marital_status else "N/A",
+                str(student.academic_group),
+                student.academic_group.department.name,
+                student.academic_group.get_study_year_display(),
+                student.academic_group.get_semester_display(),
+                "Yes" if student.is_from_large_family else "No",
+                "Yes" if student.is_from_low_income_family else "No",
+                "Yes" if student.is_from_troubled_family else "No",
+                "Yes" if student.are_parents_deceased else "No",
+                "Yes" if student.are_parents_divorced else "No",
+                "Yes" if student.is_father_deceased else "No",
+                "Yes" if student.is_mother_deceased else "No",
+                "Yes" if student.has_disability else "No",
+                father_name,
+                student.father_phone_number or "N/A",
+                "Yes" if student.is_father_retired else "No",
+                "Yes" if student.is_father_disabled else "No",
+                mother_name,
+                student.mother_phone_number or "N/A",
+                "Yes" if student.is_mother_retired else "No",
+                "Yes" if student.is_mother_disabled else "No",
+                student.siblings_count,
+                student.children_count,
+                student.guardian_name or "N/A",
+                student.guardian_phone_number or "N/A",
+                student.hobbies or "N/A",
+                student.special_skills or "N/A",
+                student.languages_spoken or "N/A",
+                "Yes" if student.agreed_to_code_of_conduct else "No",
+                student.code_agreement_date.strftime("%Y-%m-%d %H:%M") if student.code_agreement_date else "N/A",
+                "Yes" if student.is_active else "No",
+                student.created_at.strftime("%Y-%m-%d"),
+                student.updated_at.strftime("%Y-%m-%d")
+            ]
+            
+            for col_num, value in enumerate(row_data, 1):
+                cell = ws.cell(row=row_num, column=col_num, value=value)
+                cell.border = border
+                cell.alignment = Alignment(vertical="center", wrap_text=True)
+        
+        # Auto-adjust column widths
+        for column in ws.columns:
+            max_length = 0
+            column_letter = column[0].column_letter
+            
+            for cell in column:
+                try:
+                    if len(str(cell.value)) > max_length:
+                        max_length = len(str(cell.value))
+                except:
+                    pass
+            
+            adjusted_width = min(max_length + 2, 50)  # Maximum width of 50
+            ws.column_dimensions[column_letter].width = adjusted_width
+        
+        # Set row height for header
+        ws.row_dimensions[1].height = 30
+        
+        # Add summary sheet
+        summary_ws = wb.create_sheet("Summary")
+        summary_ws.append(["Filter Summary"])
+        summary_ws.append(["Total Students", len(students)])
+        summary_ws.append(["Export Date", datetime.now().strftime("%Y-%m-%d %H:%M:%S")])
+        summary_ws.append(["Exported by", tutor.get_full_name()])
+        
+        # Add filter information
+        if request.GET:
+            summary_ws.append([])
+            summary_ws.append(["Applied Filters:"])
+            for key, value in request.GET.items():
+                if value and key != 'page':
+                    summary_ws.append([key.replace('_', ' ').title(), value])
+        
+        # Style summary sheet
+        for row in summary_ws.iter_rows():
+            for cell in row:
+                cell.font = Font(size=11)
+                cell.alignment = Alignment(vertical="center")
+        
+        # Create response
+        response = HttpResponse(
+            content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        )
+        
+        filename = f"student_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.xlsx"
+        response['Content-Disposition'] = f'attachment; filename="{filename}"'
+        
+        wb.save(response)
+        return response
+        
+    except Exception as e:
+        messages.error(request, f'Error exporting data: {str(e)}')
+        return redirect('tutors:reports')
+
+
+def export_students_info(request):
     
     try:
         tutor = Tutor.objects.get(id=request.session['tutor_id'])

@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Code of Ethical Conduct - SIS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#667eea',
+                        secondary: '#764ba2',
+                        sidebar: '#1f2937',
+                        sidebarHover: '#374151',
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .sidebar-item:hover { background-color: #374151; }
+        .sidebar-item.active { background-color: #667eea; }
+        .tab-button { transition: all 0.3s ease; }
+        .tab-button.active { background-color: #667eea; color: white; }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div class="flex h-screen">
+        <!-- Sidebar -->
+        <div class="w-64 bg-sidebar text-white flex flex-col">
+            <!-- Logo Section -->
+            <div class="p-6 border-b border-gray-600">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
+                        <i class="fas fa-user-graduate text-white text-xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-bold">SIS Student</h1>
+                        <p class="text-gray-400 text-sm">{{ student_name }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Navigation Menu -->
+            <nav class="flex-1 p-4">
+                <ul class="space-y-2">
+                    <li>
+                        <a href="{% url 'students:dashboard' %}" class="sidebar-item flex items-center px-4 py-3 rounded-lg transition-colors">
+                            <i class="fas fa-tachometer-alt mr-3"></i>
+                            Dashboard
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'students:general' %}" class="sidebar-item flex items-center px-4 py-3 rounded-lg transition-colors">
+                            <i class="fas fa-info-circle mr-3"></i>
+                            General
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'students:personal_data' %}" class="sidebar-item flex items-center px-4 py-3 rounded-lg transition-colors">
+                            <i class="fas fa-user mr-3"></i>
+                            Personal Data
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'students:contact_info' %}" class="sidebar-item flex items-center px-4 py-3 rounded-lg transition-colors">
+                            <i class="fas fa-phone mr-3"></i>
+                            Contact Information
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'students:family_info' %}" class="sidebar-item flex items-center px-4 py-3 rounded-lg transition-colors">
+                            <i class="fas fa-home mr-3"></i>
+                            Family Information
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'students:additional_info' %}" class="sidebar-item flex items-center px-4 py-3 rounded-lg transition-colors">
+                            <i class="fas fa-plus-circle mr-3"></i>
+                            Additional Information
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'students:code_of_conduct' %}" class="sidebar-item flex items-center px-4 py-3 rounded-lg transition-colors active">
+                            <i class="fas fa-book-open mr-3"></i>
+                            Code of Ethical Conduct
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'students:change_password' %}" class="sidebar-item flex items-center px-4 py-3 rounded-lg transition-colors">
+                            <i class="fas fa-key mr-3"></i>
+                            Change Password
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+
+            <!-- Logout Button -->
+            <div class="p-4 border-t border-gray-600">
+                <a href="{% url 'students:logout' %}" class="sidebar-item flex items-center px-4 py-3 rounded-lg transition-colors text-red-300 hover:bg-red-900">
+                    <i class="fas fa-sign-out-alt mr-3"></i>
+                    Logout
+                </a>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="flex-1 flex flex-col overflow-hidden">
+            <!-- Header -->
+            <header class="bg-white shadow-sm border-b p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h1 class="text-2xl font-bold text-gray-900 flex items-center">
+                            <i class="fas fa-book-open mr-3 text-primary"></i>
+                            Code of Ethical Conduct
+                        </h1>
+                        {% if already_agreed %}
+                        <p class="text-green-600 text-sm mt-1">
+                            <i class="fas fa-check-circle mr-1"></i>
+                            You agreed on {{ agreement_date|date:"F d, Y \a\t g:i A" }}
+                        </p>
+                        {% endif %}
+                    </div>
+                </div>
+            </header>
+
+            <!-- Content Area -->
+            <main class="flex-1 overflow-y-auto p-6">
+                <div class="max-w-5xl mx-auto">
+                    
+                    <!-- Language Selection Tabs -->
+                    <div class="mb-6">
+                        <div class="flex space-x-1 bg-gray-200 p-1 rounded-lg">
+                            <button id="uzbek-tab" class="tab-button flex-1 py-2 px-4 rounded-md text-sm font-medium transition-all active">
+                                <i class="fas fa-flag mr-2"></i>O'zbekcha (Default)
+                            </button>
+                            <button id="russian-tab" class="tab-button flex-1 py-2 px-4 rounded-md text-sm font-medium transition-all">
+                                <i class="fas fa-flag mr-2"></i>Русский
+                            </button>
+                            <button id="english-tab" class="tab-button flex-1 py-2 px-4 rounded-md text-sm font-medium transition-all">
+                                <i class="fas fa-flag mr-2"></i>English
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Content Panels -->
+                    <div class="mb-6">
+                        
+                        <!-- Uzbek Content -->
+                        <div id="uzbek-content" class="content-panel">
+                            <div class="bg-white rounded-lg border border-gray-200 p-6 shadow-sm" style="max-height: 600px; overflow-y: auto;">
+                                <h2 class="text-2xl font-bold text-primary mb-6">{{ code_content.uzbek.title }}</h2>
+                                <div class="prose prose-lg max-w-none text-gray-700" style="line-height: 1.8;">
+                                    {{ code_content.uzbek.content|safe }}
+                                </div>
+                                {% if code_content.uzbek.source == 'fallback' %}
+                                <div class="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                                    <p class="text-blue-800 text-sm">
+                                        <i class="fas fa-info-circle mr-2"></i>
+                                        <strong>Bu namuna mazmun.</strong> Haqiqiy kodeks mazmuni uchun .docx faylni yuklang: 
+                                        <code>documents/code_of_conduct/uzbek_code.docx</code>
+                                    </p>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Russian Content -->
+                        <div id="russian-content" class="content-panel hidden">
+                            <div class="bg-white rounded-lg border border-gray-200 p-6 shadow-sm" style="max-height: 600px; overflow-y: auto;">
+                                <h2 class="text-2xl font-bold text-primary mb-6">{{ code_content.russian.title }}</h2>
+                                <div class="prose prose-lg max-w-none text-gray-700" style="line-height: 1.8;">
+                                    {{ code_content.russian.content|safe }}
+                                </div>
+                                {% if code_content.russian.source == 'fallback' %}
+                                <div class="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                                    <p class="text-blue-800 text-sm">
+                                        <i class="fas fa-info-circle mr-2"></i>
+                                        <strong>Это образец содержания.</strong> Для получения реального содержания кодекса загрузите .docx файл: 
+                                        <code>documents/code_of_conduct/russian_code.docx</code>
+                                    </p>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- English Content -->
+                        <div id="english-content" class="content-panel hidden">
+                            <div class="bg-white rounded-lg border border-gray-200 p-6 shadow-sm" style="max-height: 600px; overflow-y: auto;">
+                                <h2 class="text-2xl font-bold text-primary mb-6">{{ code_content.english.title }}</h2>
+                                <div class="prose prose-lg max-w-none text-gray-700" style="line-height: 1.8;">
+                                    {{ code_content.english.content|safe }}
+                                </div>
+                                {% if code_content.english.source == 'fallback' %}
+                                <div class="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                                    <p class="text-blue-800 text-sm">
+                                        <i class="fas fa-info-circle mr-2"></i>
+                                        <strong>This is sample content.</strong> For actual code content, upload the .docx file: 
+                                        <code>documents/code_of_conduct/english_code.docx</code>
+                                    </p>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Agreement Section -->
+                    <div class="bg-white rounded-lg border border-primary shadow-sm p-6">
+                        <h3 class="text-xl font-semibold text-primary mb-4 flex items-center">
+                            <i class="fas fa-handshake mr-3"></i>
+                            Agreement Declaration
+                        </h3>
+                        
+                        {% if already_agreed %}
+                            <!-- Already Agreed -->
+                            <div class="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
+                                <div class="flex items-center">
+                                    <i class="fas fa-check-circle text-green-600 mr-3 text-xl"></i>
+                                    <div>
+                                        <p class="font-semibold text-green-800">You have already agreed to the Code of Ethical Conduct</p>
+                                        <p class="text-green-600 text-sm">Agreement date: {{ agreement_date|date:"F d, Y \a\t g:i A" }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-start space-x-3">
+                                <input type="checkbox" id="agreementCheckbox" checked disabled class="mt-1 w-4 h-4 text-primary bg-gray-100 border-gray-300 rounded">
+                                <label for="agreementCheckbox" class="text-gray-500 text-sm">
+                                    I have read and agree to abide by the Code of Ethical Conduct of Samarkand International University of Technology
+                                </label>
+                            </div>
+                        {% else %}
+                            <!-- Not Yet Agreed -->
+                            <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+                                <div class="flex items-center">
+                                    <i class="fas fa-info-circle text-blue-600 mr-3 text-xl"></i>
+                                    <p class="text-blue-800">Please read the Code of Ethical Conduct carefully in your preferred language and confirm your agreement below.</p>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-start space-x-3 mb-4">
+                                <input type="checkbox" id="agreementCheckbox" class="mt-1 w-4 h-4 text-primary bg-gray-100 border-gray-300 rounded focus:ring-primary">
+                                <label for="agreementCheckbox" class="text-gray-700 font-medium">
+                                    I have read and agree to abide by the Code of Ethical Conduct of Samarkand International University of Technology
+                                </label>
+                            </div>
+                            
+                            <button id="confirmAgreement" disabled class="bg-primary text-white px-6 py-3 rounded-lg font-medium transition-colors hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed">
+                                <i class="fas fa-check mr-2"></i>
+                                Confirm Agreement
+                            </button>
+                        {% endif %}
+                    </div>
+
+                    <!-- Back Button -->
+                    <div class="mt-6">
+                        <a href="{% url 'students:dashboard' %}" class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg text-gray-700 bg-white hover:bg-gray-50 transition-colors">
+                            <i class="fas fa-arrow-left mr-2"></i>
+                            Back to Dashboard
+                        </a>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Success Modal -->
+    <div id="successModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden z-50">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="bg-white rounded-lg shadow-xl max-w-md w-full">
+                <div class="bg-green-600 text-white p-4 rounded-t-lg">
+                    <h3 class="text-lg font-semibold flex items-center">
+                        <i class="fas fa-check-circle mr-2"></i>
+                        Agreement Confirmed
+                    </h3>
+                </div>
+                <div class="p-6 text-center">
+                    <i class="fas fa-check-circle text-green-600 text-5xl mb-4"></i>
+                    <h4 class="text-xl font-semibold mb-2">Thank you!</h4>
+                    <p class="text-gray-600 mb-2">Your agreement to the Code of Ethical Conduct has been recorded.</p>
+                    <p class="text-gray-500 text-sm" id="agreementTimestamp"></p>
+                </div>
+                <div class="bg-gray-50 px-6 py-3 rounded-b-lg text-right">
+                    <button id="closeModal" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Tab switching functionality
+        const tabs = document.querySelectorAll('.tab-button');
+        const panels = document.querySelectorAll('.content-panel');
+        
+        tabs.forEach(tab => {
+            tab.addEventListener('click', function() {
+                const targetId = this.id.replace('-tab', '-content');
+                
+                // Remove active class from all tabs
+                tabs.forEach(t => t.classList.remove('active'));
+                // Add active class to clicked tab
+                this.classList.add('active');
+                
+                // Hide all panels
+                panels.forEach(panel => panel.classList.add('hidden'));
+                // Show target panel
+                document.getElementById(targetId).classList.remove('hidden');
+            });
+        });
+        
+        // Agreement functionality
+        const checkbox = document.getElementById('agreementCheckbox');
+        const confirmButton = document.getElementById('confirmAgreement');
+        
+        if (checkbox && confirmButton) {
+            // Enable/disable confirm button based on checkbox
+            checkbox.addEventListener('change', function() {
+                confirmButton.disabled = !this.checked;
+                confirmButton.className = this.checked 
+                    ? 'bg-primary text-white px-6 py-3 rounded-lg font-medium transition-colors hover:bg-blue-700'
+                    : 'bg-gray-300 text-gray-500 px-6 py-3 rounded-lg font-medium cursor-not-allowed';
+            });
+            
+            // Handle agreement confirmation
+            confirmButton.addEventListener('click', function() {
+                if (!checkbox.checked) {
+                    alert('Please check the agreement box first.');
+                    return;
+                }
+                
+                // Disable button and show loading
+                confirmButton.disabled = true;
+                confirmButton.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Processing...';
+                confirmButton.className = 'bg-gray-300 text-gray-500 px-6 py-3 rounded-lg font-medium cursor-not-allowed';
+                
+                // Send AJAX request
+                fetch('{% url "students:agree_to_code" %}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    },
+                    body: JSON.stringify({})
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Show success modal
+                        document.getElementById('agreementTimestamp').textContent = 'Agreed on: ' + data.agreement_date;
+                        document.getElementById('successModal').classList.remove('hidden');
+                        
+                        // Disable checkbox and hide button
+                        checkbox.disabled = true;
+                        confirmButton.style.display = 'none';
+                    } else {
+                        alert('Error: ' + data.error);
+                        confirmButton.disabled = false;
+                        confirmButton.innerHTML = '<i class="fas fa-check mr-2"></i>Confirm Agreement';
+                        confirmButton.className = 'bg-primary text-white px-6 py-3 rounded-lg font-medium transition-colors hover:bg-blue-700';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('An error occurred. Please try again.');
+                    confirmButton.disabled = false;
+                    confirmButton.innerHTML = '<i class="fas fa-check mr-2"></i>Confirm Agreement';
+                    confirmButton.className = 'bg-primary text-white px-6 py-3 rounded-lg font-medium transition-colors hover:bg-blue-700';
+                });
+            });
+        }
+        
+        // Close modal functionality
+        document.getElementById('closeModal')?.addEventListener('click', function() {
+            document.getElementById('successModal').classList.add('hidden');
+            location.reload();
+        });
+    });
+    </script>
+</body>
+</html>

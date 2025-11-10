@@ -1,0 +1,640 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Reports - Tutor Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .sidebar-item:hover {
+            background-color: rgba(59, 130, 246, 0.1);
+            color: #3b82f6;
+        }
+        .sidebar-item.active {
+            background-color: #3b82f6;
+            color: white;
+        }
+        .filter-card {
+            transition: all 0.3s ease;
+        }
+        .filter-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 25px rgba(0, 0, 0, 0.1);
+        }
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .table-responsive {
+            overflow-x: auto;
+            overflow-y: auto;
+        }
+        .filter-section {
+            display: none;
+        }
+        .filter-section.active {
+            display: block;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div class="flex h-screen">
+        <!-- Sidebar -->
+        <div class="bg-gray-800 text-white w-64 min-h-screen flex flex-col">
+            <!-- Logo and Title -->
+            <div class="p-6 bg-gray-900">
+                <div class="flex items-center space-x-3">
+                    <div class="bg-blue-600 rounded-lg p-2">
+                        <i class="fas fa-user-graduate text-white text-xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-bold">SIS Tutor</h1>
+                        <p class="text-gray-400 text-sm">{{ tutor_name }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Navigation Menu -->
+            <nav class="flex-1 p-4">
+                <ul class="space-y-2">
+                    <li>
+                        <a href="{% url 'tutors:dashboard' %}" class="sidebar-item flex items-center px-4 py-3 rounded-lg transition-colors">
+                            <i class="fas fa-tachometer-alt mr-3"></i>
+                            Dashboard
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'tutors:academic_groups' %}" class="sidebar-item flex items-center px-4 py-3 rounded-lg transition-colors">
+                            <i class="fas fa-users mr-3"></i>
+                            Academic Groups
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'tutors:reports' %}" class="sidebar-item active flex items-center px-4 py-3 rounded-lg transition-colors">
+                            <i class="fas fa-chart-bar mr-3"></i>
+                            Advanced Reports
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'tutors:settings' %}" class="sidebar-item flex items-center px-4 py-3 rounded-lg transition-colors">
+                            <i class="fas fa-cog mr-3"></i>
+                            Settings
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+
+            <!-- Logout Button -->
+            <div class="p-4 border-t border-gray-700">
+                <a href="{% url 'tutors:logout' %}" class="flex items-center px-4 py-2 text-red-400 hover:text-red-300 transition-colors">
+                    <i class="fas fa-sign-out-alt mr-3"></i>
+                    Logout
+                </a>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="flex-1 flex flex-col overflow-auto">
+            <!-- Header -->
+            <header class="bg-white shadow-sm border-b border-gray-200 p-6">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <h1 class="text-2xl font-bold text-gray-800">
+                            <i class="fas fa-chart-line text-blue-600 mr-3"></i>
+                            Advanced Student Reports
+                        </h1>
+                        <p class="text-gray-600 mt-1">Comprehensive filtering and analytics for your assigned groups</p>
+                    </div>
+                    <div class="flex space-x-3">
+                        <button onclick="toggleFilterType()" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                            <i class="fas fa-filter mr-2"></i>
+                            {{ filter_type|title }} Filters
+                        </button>
+                        {% if students %}
+                        <button onclick="exportData()" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors">
+                            <i class="fas fa-file-excel mr-2"></i>
+                            Export Excel
+                        </button>
+                        {% endif %}
+                    </div>
+                </div>
+            </header>
+
+            <!-- Access Information -->
+            <div class="p-6">
+                <div class="bg-blue-50 border-l-4 border-blue-400 p-4 mb-6">
+                    <div class="flex">
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-info-circle text-blue-400"></i>
+                        </div>
+                        <div class="ml-3">
+                            <p class="text-sm text-blue-700">
+                                <strong>Access Level:</strong> You can view and manage students from your assigned groups only ({{ total_groups }} group{{ total_groups|pluralize }}).
+                                Students from other groups are not visible in this system for privacy and security reasons.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Statistics Cards -->
+            <div class="p-6 grid grid-cols-1 md:grid-cols-4 gap-6">
+                <div class="stat-card text-white p-6 rounded-lg">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h3 class="text-lg font-semibold">Total Students</h3>
+                            <p class="text-3xl font-bold">{{ total_students }}</p>
+                        </div>
+                        <i class="fas fa-user-graduate text-4xl opacity-80"></i>
+                    </div>
+                </div>
+                
+                <div class="bg-green-500 text-white p-6 rounded-lg">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h3 class="text-lg font-semibold">Groups</h3>
+                            <p class="text-3xl font-bold">{{ total_groups }}</p>
+                        </div>
+                        <i class="fas fa-users text-4xl opacity-80"></i>
+                    </div>
+                </div>
+                
+                <div class="bg-yellow-500 text-white p-6 rounded-lg">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h3 class="text-lg font-semibold">Male/Female</h3>
+                            <p class="text-lg font-bold">{{ gender_stats.male }}/{{ gender_stats.female }}</p>
+                        </div>
+                        <i class="fas fa-venus-mars text-4xl opacity-80"></i>
+                    </div>
+                </div>
+                
+                <div class="bg-purple-500 text-white p-6 rounded-lg">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h3 class="text-lg font-semibold">Code Agreement</h3>
+                            <p class="text-lg font-bold">{{ code_stats.agreed }}/{{ total_students }}</p>
+                        </div>
+                        <i class="fas fa-check-circle text-4xl opacity-80"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Filter Section -->
+            <div class="px-6">
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 filter-card">
+                    <!-- Filter Type Toggle -->
+                    <div class="flex items-center space-x-4 mb-6">
+                        <button onclick="setFilterType('quick')" 
+                                class="filter-toggle {% if filter_type == 'quick' %}bg-blue-600 text-white{% else %}bg-gray-200 text-gray-700{% endif %} px-4 py-2 rounded-lg transition-colors">
+                            <i class="fas fa-search mr-2"></i>Quick Filter
+                        </button>
+                        <button onclick="setFilterType('advanced')" 
+                                class="filter-toggle {% if filter_type == 'advanced' %}bg-blue-600 text-white{% else %}bg-gray-200 text-gray-700{% endif %} px-4 py-2 rounded-lg transition-colors">
+                            <i class="fas fa-sliders-h mr-2"></i>Advanced Filter
+                        </button>
+                        <button onclick="clearFilters()" class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition-colors">
+                            <i class="fas fa-times mr-2"></i>Clear All
+                        </button>
+                    </div>
+
+                    <!-- Filter Form -->
+                    <form method="get" id="filter-form">
+                        <input type="hidden" name="filter_type" value="{{ filter_type }}">
+                        
+                        <!-- Quick Filter Section -->
+                        <div id="quick-filters" class="filter-section {% if filter_type == 'quick' %}active{% endif %}">
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Search Students</label>
+                                    {{ filter.form.search }}
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Group</label>
+                                    {{ filter.form.academic_group }}
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Gender</label>
+                                    {{ filter.form.gender }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Advanced Filter Section -->
+                        <div id="advanced-filters" class="filter-section {% if filter_type == 'advanced' %}active{% endif %}">
+                            <div class="space-y-6">
+                                <!-- Basic Information -->
+                                <div>
+                                    <h4 class="text-lg font-semibold text-gray-800 mb-3 border-b pb-2">
+                                        <i class="fas fa-user mr-2"></i>Basic Information
+                                    </h4>
+                                    <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">Search Name</label>
+                                            {{ filter.form.search }}
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">Gender</label>
+                                            {{ filter.form.gender }}
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">Nation</label>
+                                            {{ filter.form.nation }}
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">Marital Status</label>
+                                            {{ filter.form.marital_status }}
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">ID Card Number</label>
+                                            {{ filter.form.id_card }}
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">Hobbies & Interests</label>
+                                            {{ filter.form.hobbies }}
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">Special Skills & Talents</label>
+                                            {{ filter.form.special_skills }}
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">Languages Spoken</label>
+                                            {{ filter.form.languages_spoken }}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Academic Information -->
+                                <div>
+                                    <h4 class="text-lg font-semibold text-gray-800 mb-3 border-b pb-2">
+                                        <i class="fas fa-graduation-cap mr-2"></i>Academic Information
+                                    </h4>
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">Group</label>
+                                            {{ filter.form.academic_group }}
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">Department</label>
+                                            {{ filter.form.department }}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Family Status -->
+                                <div>
+                                    <h4 class="text-lg font-semibold text-gray-800 mb-3 border-b pb-2">
+                                        <i class="fas fa-home mr-2"></i>Family Status
+                                    </h4>
+                                    <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">Large Family</label>
+                                            {{ filter.form.is_from_large_family }}
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">Low Income</label>
+                                            {{ filter.form.is_from_low_income_family }}
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">Troubled Family</label>
+                                            {{ filter.form.is_from_troubled_family }}
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">Parents Deceased</label>
+                                            {{ filter.form.are_parents_deceased }}
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">Parents Divorced</label>
+                                            {{ filter.form.are_parents_divorced }}
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">Has Disability</label>
+                                            {{ filter.form.has_disability }}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Parent Status -->
+                                <div>
+                                    <h4 class="text-lg font-semibold text-gray-800 mb-3 border-b pb-2">
+                                        <i class="fas fa-users mr-2"></i>Parent Status
+                                    </h4>
+                                    <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">Father Deceased</label>
+                                            {{ filter.form.is_father_deceased }}
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">Mother Deceased</label>
+                                            {{ filter.form.is_mother_deceased }}
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">Father Retired</label>
+                                            {{ filter.form.is_father_retired }}
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">Mother Retired</label>
+                                            {{ filter.form.is_mother_retired }}
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">Father Disabled</label>
+                                            {{ filter.form.is_father_disabled }}
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">Mother Disabled</label>
+                                            {{ filter.form.is_mother_disabled }}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Additional Filters -->
+                                <div>
+                                    <h4 class="text-lg font-semibold text-gray-800 mb-3 border-b pb-2">
+                                        <i class="fas fa-cogs mr-2"></i>Additional Filters
+                                    </h4>
+                                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">Siblings Count</label>
+                                            {{ filter.form.siblings_count }}
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">Children Count</label>
+                                            {{ filter.form.children_count }}
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">Code Agreement</label>
+                                            {{ filter.form.agreed_to_code_of_conduct }}
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">Active Status</label>
+                                            {{ filter.form.is_active }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <div class="mt-6 flex items-center space-x-4">
+                            <button type="submit" class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                                <i class="fas fa-search mr-2"></i>Apply Filters
+                            </button>
+                            <div class="text-sm text-gray-600">
+                                Showing {{ students|length }} of {{ total_students }} students
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Results Table -->
+            <div class="flex-1 p-6">
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200 min-h-96">
+                    <!-- Table Header -->
+                    <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+                        <h3 class="text-lg font-semibold text-gray-800">Student Results</h3>
+                        <div class="flex items-center space-x-4">
+                            <div class="flex items-center">
+                                <label class="text-sm text-gray-700 mr-2">Show:</label>
+                                <select onchange="changePageSize(this.value)" class="form-control">
+                                    {% for size in page_sizes %}
+                                    <option value="{{ size }}" {% if size == page_size %}selected{% endif %}>{{ size }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Table -->
+                    {% if students %}
+                    <div class="table-responsive">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Student</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID / Contact</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Academic</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Personal</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Family Status</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Code Agreement</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                {% for student in students %}
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="flex items-center">
+                                            <div class="flex-shrink-0 h-10 w-10">
+                                                <div class="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
+                                                    <span class="text-sm font-medium text-blue-600">
+                                                        {{ student.first_name|first }}{{ student.last_name|first }}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            <div class="ml-4">
+                                                <div class="text-sm font-medium text-gray-900">{{ student.get_full_name }}</div>
+                                                <div class="text-sm text-gray-500">
+                                                    {% if student.birthday %}{{ student.get_age }} years old{% endif %}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="text-sm text-gray-900">
+                                            {% if student.student_id %}ID: {{ student.student_id }}{% endif %}
+                                        </div>
+                                        <div class="text-sm text-gray-500">
+                                            {% if student.phone_number %}{{ student.phone_number }}{% endif %}
+                                        </div>
+                                        <div class="text-sm text-gray-500">
+                                            {% if student.email %}{{ student.email }}{% endif %}
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="text-sm text-gray-900">{{ student.academic_group.group_name }}</div>
+                                        <div class="text-sm text-gray-500">{{ student.academic_group.get_study_year_display }}</div>
+                                        <div class="text-sm text-gray-500">{{ student.academic_group.department.name }}</div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="text-sm text-gray-900">
+                                            {% if student.gender %}{{ student.get_gender_display }}{% endif %}
+                                            {% if student.nation %}, {{ student.get_nation_display }}{% endif %}
+                                        </div>
+                                        <div class="text-sm text-gray-500">
+                                            {% if student.marital_status %}{{ student.get_marital_status_display }}{% endif %}
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="flex flex-wrap gap-1">
+                                            {% if student.is_from_large_family %}
+                                                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">Large Family</span>
+                                            {% endif %}
+                                            {% if student.is_from_low_income_family %}
+                                                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">Low Income</span>
+                                            {% endif %}
+                                            {% if student.has_disability %}
+                                                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800">Disability</span>
+                                            {% endif %}
+                                            {% if student.are_parents_deceased %}
+                                                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">Orphan</span>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        {% if student.agreed_to_code_of_conduct %}
+                                            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                                <i class="fas fa-check mr-1"></i>Agreed
+                                            </span>
+                                            {% if student.code_agreement_date %}
+                                                <div class="text-xs text-gray-500 mt-1">{{ student.code_agreement_date|date:"M d, Y" }}</div>
+                                            {% endif %}
+                                        {% else %}
+                                            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                                                <i class="fas fa-times mr-1"></i>Not Agreed
+                                            </span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="6" class="px-6 py-12 text-center text-gray-500">
+                                        <div class="flex flex-col items-center">
+                                            <i class="fas fa-search text-4xl mb-4 opacity-50"></i>
+                                            <p class="text-lg">No students found matching your criteria</p>
+                                            <p class="text-sm">Try adjusting your filters</p>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Pagination -->
+                    {% if students.has_other_pages %}
+                    <div class="bg-white px-6 py-3 border-t border-gray-200 flex items-center justify-between">
+                        <div class="flex-1 flex justify-between sm:hidden">
+                            {% if students.has_previous %}
+                                <a href="?page={{ students.previous_page_number }}&{{ current_filters }}" class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">Previous</a>
+                            {% endif %}
+                            {% if students.has_next %}
+                                <a href="?page={{ students.next_page_number }}&{{ current_filters }}" class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">Next</a>
+                            {% endif %}
+                        </div>
+                        <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+                            <div>
+                                <p class="text-sm text-gray-700">
+                                    Showing <span class="font-medium">{{ students.start_index }}</span> to <span class="font-medium">{{ students.end_index }}</span> of <span class="font-medium">{{ total_students }}</span> results
+                                </p>
+                            </div>
+                            <div>
+                                <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+                                    {% if students.has_previous %}
+                                        <a href="?page={{ students.previous_page_number }}&{{ current_filters }}" class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                                            <i class="fas fa-chevron-left"></i>
+                                        </a>
+                                    {% endif %}
+                                    
+                                    {% for num in students.paginator.page_range %}
+                                        {% if students.number == num %}
+                                            <span class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-blue-50 text-sm font-medium text-blue-600">{{ num }}</span>
+                                        {% elif num > students.number|add:'-3' and num < students.number|add:'3' %}
+                                            <a href="?page={{ num }}&{{ current_filters }}" class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">{{ num }}</a>
+                                        {% endif %}
+                                    {% endfor %}
+                                    
+                                    {% if students.has_next %}
+                                        <a href="?page={{ students.next_page_number }}&{{ current_filters }}" class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                                            <i class="fas fa-chevron-right"></i>
+                                        </a>
+                                    {% endif %}
+                                </nav>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                    {% else %}
+                    <!-- No Students Message -->
+                    <div class="text-center py-12">
+                        <div class="text-gray-400 mb-4">
+                            <i class="fas fa-users text-6xl"></i>
+                        </div>
+                        <h3 class="text-lg font-medium text-gray-900 mb-2">No Students Found</h3>
+                        <p class="text-gray-500 mb-4">
+                            {% if request.GET %}
+                                No students match your current filter criteria. Try adjusting your filters or clear them to see all students.
+                            {% else %}
+                                You don't have any students assigned to your groups yet.
+                            {% endif %}
+                        </p>
+                        {% if request.GET %}
+                        <button onclick="clearFilters()" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                            <i class="fas fa-times mr-2"></i>Clear Filters
+                        </button>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function setFilterType(type) {
+            document.querySelector('input[name="filter_type"]').value = type;
+            
+            // Toggle filter sections
+            document.querySelectorAll('.filter-section').forEach(section => {
+                section.classList.remove('active');
+            });
+            document.getElementById(type + '-filters').classList.add('active');
+            
+            // Toggle button styles
+            document.querySelectorAll('.filter-toggle').forEach(btn => {
+                btn.classList.remove('bg-blue-600', 'text-white');
+                btn.classList.add('bg-gray-200', 'text-gray-700');
+            });
+            event.target.classList.remove('bg-gray-200', 'text-gray-700');
+            event.target.classList.add('bg-blue-600', 'text-white');
+        }
+
+        function toggleFilterType() {
+            const currentType = document.querySelector('input[name="filter_type"]').value;
+            const newType = currentType === 'quick' ? 'advanced' : 'quick';
+            setFilterType(newType);
+        }
+
+        function clearFilters() {
+            const form = document.getElementById('filter-form');
+            form.reset();
+            const filterType = document.querySelector('input[name="filter_type"]').value;
+            window.location.href = '?filter_type=' + filterType;
+        }
+
+        function changePageSize(size) {
+            const url = new URL(window.location);
+            url.searchParams.set('page_size', size);
+            url.searchParams.delete('page');
+            window.location.href = url.toString();
+        }
+
+        function exportData() {
+            const url = new URL(window.location);
+            url.pathname = '{% url "tutors:export_filtered_students" %}';
+            window.open(url.toString(), '_blank');
+        }
+
+        // Auto-submit form when filters change (for quick filters)
+        document.addEventListener('DOMContentLoaded', function() {
+            const quickInputs = document.querySelectorAll('#quick-filters input, #quick-filters select');
+            quickInputs.forEach(input => {
+                input.addEventListener('change', function() {
+                    document.getElementById('filter-form').submit();
+                });
+            });
+        });
+    </script>
+</body>
+</html>

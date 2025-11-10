@@ -264,6 +264,10 @@ class Student(models.Model):
     password = models.CharField(max_length=128, blank=True, null=True, help_text="Password for login")
     last_login = models.DateTimeField(blank=True, null=True)
     
+    # Code of Ethical Conduct Agreement
+    agreed_to_code_of_conduct = models.BooleanField(default=False, help_text="Student has agreed to the Code of Ethical Conduct")
+    code_agreement_date = models.DateTimeField(blank=True, null=True, help_text="Date when student agreed to the code")
+    
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(auto_now=True)
