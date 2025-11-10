@@ -13,6 +13,14 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 from pathlib import Path
 import os
 
+
+def _get_env_list(key: str, default: list[str]) -> list[str]:
+    """Return a list from a comma-separated env var or the provided default."""
+    value = os.environ.get(key)
+    if value:
+        return [item.strip() for item in value.split(',') if item.strip()]
+    return default
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -24,9 +32,23 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-your-secret-key-here-change-in-production'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.environ.get('DEBUG', '1') == '1'
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1']
+ALLOWED_HOSTS = _get_env_list('ALLOWED_HOSTS', ['localhost', '127.0.0.1'])
+
+CSRF_TRUSTED_ORIGINS = _get_env_list(
+    'CSRF_TRUSTED_ORIGINS',
+    [
+        'http://localhost',
+        'http://127.0.0.1',
+        'http://localhost:8080',
+        'http://127.0.0.1:8080',
+        'https://localhost',
+        'https://127.0.0.1',
+        'https://localhost:8080',
+        'https://127.0.0.1:8080',
+    ],
+)
 
 
 # Application definition
