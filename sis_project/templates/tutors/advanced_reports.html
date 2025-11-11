@@ -187,6 +187,10 @@
                 <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 filter-card">
                     <!-- Filter Type Toggle -->
                     <div class="flex items-center space-x-4 mb-6">
+                        <!-- Debug: Show current filter type -->
+                        <div class="bg-yellow-100 p-2 rounded text-sm">
+                            Debug: filter_type = "{{ filter_type }}"
+                        </div>
                         <button onclick="setFilterType('quick')" 
                                 class="filter-toggle {% if filter_type == 'quick' %}bg-blue-600 text-white{% else %}bg-gray-200 text-gray-700{% endif %} px-4 py-2 rounded-lg transition-colors">
                             <i class="fas fa-search mr-2"></i>Quick Filter
@@ -224,6 +228,10 @@
 
                         <!-- Advanced Filter Section -->
                         <div id="advanced-filters" class="filter-section {% if filter_type == 'advanced' %}active{% endif %}">
+                            <!-- Debug: Check if this section is visible -->
+                            <div class="bg-green-100 p-2 rounded text-sm mb-4">
+                                Debug: Advanced filters section - filter_type: "{{ filter_type }}" - Should be active: {{ filter_type == 'advanced' }}
+                            </div>
                             <div class="space-y-6">
                                 <!-- Basic Information -->
                                 <div>
