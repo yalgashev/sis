@@ -390,7 +390,7 @@ def tutor_delete_student_view(request, student_id):
 
 
 def tutor_reports_view(request):
-    """Advanced reports page with filtering and export functionality"""
+    """Student reports page with comprehensive field filtering"""
     # Check if tutor is logged in
     if 'tutor_id' not in request.session:
         messages.error(request, 'Please log in to access this page.')
@@ -403,528 +403,163 @@ def tutor_reports_view(request):
         messages.error(request, 'Tutor not found. Please log in again.')
         return redirect('login')
     
-    # Get all students from tutor's assigned groups
-    assigned_groups = tutor.assigned_groups.filter(is_active=True)
-    students_queryset = Student.objects.filter(
-        academic_group__in=assigned_groups
-    ).select_related(
-        'academic_group',
-        'academic_group__department',
-        'academic_group__school'
-    ).order_by('last_name', 'first_name')
+    # Get tutor's assigned groups
+    assigned_groups = tutor.assigned_groups.filter(is_active=True).order_by('group_name')
     
-    # Apply filters
-    filter_type = request.GET.get('filter_type', 'quick')
+    # Get selected group (if any)
+    selected_group_id = request.GET.get('group')
+    selected_group = None
+    if selected_group_id and selected_group_id != 'all':
+        try:
+            selected_group = assigned_groups.get(id=int(selected_group_id))
+        except (ValueError, AcademicGroup.DoesNotExist):
+            selected_group = None
     
-    if filter_type == 'advanced':
-        student_filter = AdvancedStudentFilter(
-            request.GET, 
-            queryset=students_queryset,
-            assigned_groups=assigned_groups
-        )
-    else:
-        student_filter = QuickStudentFilter(
-            request.GET, 
-            queryset=students_queryset,
-            assigned_groups=assigned_groups
-        )
-    
-    filtered_students = student_filter.qs
-    
-    # Pagination
-    page_size = request.GET.get('page_size', '25')
-    try:
-        page_size = int(page_size)
-        if page_size not in [10, 25, 50, 100]:
-            page_size = 25
-    except ValueError:
-        page_size = 25
-    
-    paginator = Paginator(filtered_students, page_size)
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
-    
-    # Statistics
-    total_students = filtered_students.count()
-    total_groups = assigned_groups.count()
-    
-    # Gender statistics
-    gender_stats = {
-        'male': filtered_students.filter(gender='male').count(),
-        'female': filtered_students.filter(gender='female').count(),
-        'not_specified': filtered_students.filter(gender__isnull=True).count() + filtered_students.filter(gender='').count()
-    }
-    
-    # Family status statistics
-    family_stats = {
-        'large_family': filtered_students.filter(is_from_large_family=True).count(),
-        'low_income': filtered_students.filter(is_from_low_income_family=True).count(),
-        'troubled_family': filtered_students.filter(is_from_troubled_family=True).count(),
-        'parents_deceased': filtered_students.filter(are_parents_deceased=True).count(),
-        'parents_divorced': filtered_students.filter(are_parents_divorced=True).count(),
-        'has_disability': filtered_students.filter(has_disability=True).count(),
-    }
-    
-    # Code of conduct statistics
-    code_stats = {
-        'agreed': filtered_students.filter(agreed_to_code_of_conduct=True).count(),
-        'not_agreed': filtered_students.filter(agreed_to_code_of_conduct=False).count(),
-    }
-    
-    context = {
-        'tutor_name': request.session.get('tutor_name'),
-        'tutor_username': request.session.get('tutor_username'),
-        'tutor': tutor,
-        'filter': student_filter,
-        'students': page_obj,
-        'filter_type': filter_type,
-        'total_students': total_students,
-        'total_groups': total_groups,
-        'gender_stats': gender_stats,
-        'family_stats': family_stats,
-        'code_stats': code_stats,
-        'page_size': page_size,
-        'page_sizes': [10, 25, 50, 100],
-        'current_filters': request.GET.urlencode(),
-    }
-    
-    return render(request, 'tutors/advanced_reports.html', context)
-
-
-def export_filtered_students(request):
-    """Export filtered students to Excel with all information"""
-    if 'tutor_id' not in request.session:
-        messages.error(request, 'Please log in to access this page.')
-        return redirect('login')
-    
-    try:
-        tutor = Tutor.objects.get(id=request.session['tutor_id'])
-        assigned_groups = tutor.assigned_groups.filter(is_active=True)
-        
-        # Get the same filtered queryset as in reports view
+    # Get students queryset based on group selection
+    if selected_group:
         students_queryset = Student.objects.filter(
-            academic_group__in=assigned_groups
+            academic_group=selected_group,
+            is_active=True
         ).select_related(
             'academic_group',
             'academic_group__department',
             'academic_group__school'
         ).order_by('last_name', 'first_name')
-        
-        # Apply the same filters
-        filter_type = request.GET.get('filter_type', 'quick')
-        if filter_type == 'advanced':
-            student_filter = AdvancedStudentFilter(
-                request.GET, 
-                queryset=students_queryset,
-                assigned_groups=assigned_groups
-            )
-        else:
-            student_filter = QuickStudentFilter(
-                request.GET, 
-                queryset=students_queryset,
-                assigned_groups=assigned_groups
-            )
-        
-        students = student_filter.qs
-        
-        # Create workbook
-        wb = openpyxl.Workbook()
-        ws = wb.active
-        ws.title = "Student Report"
-        
-        # Define comprehensive headers
-        headers = [
-            "No.", "Student ID", "Full Name", "First Name", "Last Name", "Middle Name",
-            "Birthday", "Age", "Gender", "Nation", "ID Card", "Phone", "Email", "Telegram",
-            "Home Address", "Marital Status", "Group", "Department", "Study Year", "Semester",
-            "Large Family", "Low Income", "Troubled Family", "Parents Deceased", "Parents Divorced",
-            "Father Deceased", "Mother Deceased", "Has Disability", "Father Name", "Father Phone",
-            "Father Retired", "Father Disabled", "Mother Name", "Mother Phone", "Mother Retired",
-            "Mother Disabled", "Siblings Count", "Children Count", "Guardian Name", "Guardian Phone",
-            "Hobbies", "Special Skills", "Languages", "Code Agreement", "Agreement Date",
-            "Active", "Created Date", "Last Updated"
-        ]
-        
-        # Style headers
-        header_font = Font(bold=True, color="FFFFFF", size=11)
-        header_fill = PatternFill(start_color="366092", end_color="366092", fill_type="solid")
-        header_alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
-        border = Border(
-            left=Side(style='thin'),
-            right=Side(style='thin'),
-            top=Side(style='thin'),
-            bottom=Side(style='thin')
-        )
-        
-        # Apply header styles
-        for col_num, header in enumerate(headers, 1):
-            cell = ws.cell(row=1, column=col_num, value=header)
-            cell.font = header_font
-            cell.fill = header_fill
-            cell.alignment = header_alignment
-            cell.border = border
-        
-        # Add data rows
-        for row_num, student in enumerate(students, 2):
-            # Calculate age
-            age = student.get_age() if student.birthday else "N/A"
-            
-            # Father full name
-            father_name = ""
-            if student.father_first_name or student.father_last_name:
-                father_parts = [student.father_first_name, student.father_middle_name, student.father_last_name]
-                father_name = " ".join([part for part in father_parts if part])
-            
-            # Mother full name
-            mother_name = ""
-            if student.mother_first_name or student.mother_last_name:
-                mother_parts = [student.mother_first_name, student.mother_middle_name, student.mother_last_name]
-                mother_name = " ".join([part for part in mother_parts if part])
-            
-            row_data = [
-                row_num - 1,  # No.
-                student.student_id or "N/A",
-                student.get_full_name(),
-                student.first_name,
-                student.last_name,
-                student.middle_name or "",
-                student.birthday.strftime("%Y-%m-%d") if student.birthday else "N/A",
-                age,
-                student.get_gender_display() if student.gender else "N/A",
-                student.get_nation_display() if student.nation else "N/A",
-                student.id_card or "N/A",
-                student.phone_number or "N/A",
-                student.email or "N/A",
-                student.telegram_username or "N/A",
-                student.home_address or "N/A",
-                student.get_marital_status_display() if student.marital_status else "N/A",
-                str(student.academic_group),
-                student.academic_group.department.name,
-                student.academic_group.get_study_year_display(),
-                student.academic_group.get_semester_display(),
-                "Yes" if student.is_from_large_family else "No",
-                "Yes" if student.is_from_low_income_family else "No",
-                "Yes" if student.is_from_troubled_family else "No",
-                "Yes" if student.are_parents_deceased else "No",
-                "Yes" if student.are_parents_divorced else "No",
-                "Yes" if student.is_father_deceased else "No",
-                "Yes" if student.is_mother_deceased else "No",
-                "Yes" if student.has_disability else "No",
-                father_name,
-                student.father_phone_number or "N/A",
-                "Yes" if student.is_father_retired else "No",
-                "Yes" if student.is_father_disabled else "No",
-                mother_name,
-                student.mother_phone_number or "N/A",
-                "Yes" if student.is_mother_retired else "No",
-                "Yes" if student.is_mother_disabled else "No",
-                student.siblings_count,
-                student.children_count,
-                student.guardian_name or "N/A",
-                student.guardian_phone_number or "N/A",
-                student.hobbies or "N/A",
-                student.special_skills or "N/A",
-                student.languages_spoken or "N/A",
-                "Yes" if student.agreed_to_code_of_conduct else "No",
-                student.code_agreement_date.strftime("%Y-%m-%d %H:%M") if student.code_agreement_date else "N/A",
-                "Yes" if student.is_active else "No",
-                student.created_at.strftime("%Y-%m-%d"),
-                student.updated_at.strftime("%Y-%m-%d")
-            ]
-            
-            for col_num, value in enumerate(row_data, 1):
-                cell = ws.cell(row=row_num, column=col_num, value=value)
-                cell.border = border
-                cell.alignment = Alignment(vertical="center", wrap_text=True)
-        
-        # Auto-adjust column widths
-        for column in ws.columns:
-            max_length = 0
-            column_letter = column[0].column_letter
-            
-            for cell in column:
-                try:
-                    if len(str(cell.value)) > max_length:
-                        max_length = len(str(cell.value))
-                except:
-                    pass
-            
-            adjusted_width = min(max_length + 2, 50)  # Maximum width of 50
-            ws.column_dimensions[column_letter].width = adjusted_width
-        
-        # Set row height for header
-        ws.row_dimensions[1].height = 30
-        
-        # Add summary sheet
-        summary_ws = wb.create_sheet("Summary")
-        summary_ws.append(["Filter Summary"])
-        summary_ws.append(["Total Students", len(students)])
-        summary_ws.append(["Export Date", datetime.now().strftime("%Y-%m-%d %H:%M:%S")])
-        summary_ws.append(["Exported by", tutor.get_full_name()])
-        
-        # Add filter information
-        if request.GET:
-            summary_ws.append([])
-            summary_ws.append(["Applied Filters:"])
-            for key, value in request.GET.items():
-                if value and key != 'page':
-                    summary_ws.append([key.replace('_', ' ').title(), value])
-        
-        # Style summary sheet
-        for row in summary_ws.iter_rows():
-            for cell in row:
-                cell.font = Font(size=11)
-                cell.alignment = Alignment(vertical="center")
-        
-        # Create response
-        response = HttpResponse(
-            content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-        )
-        
-        filename = f"student_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.xlsx"
-        response['Content-Disposition'] = f'attachment; filename="{filename}"'
-        
-        wb.save(response)
-        return response
-        
-    except Exception as e:
-        messages.error(request, f'Error exporting data: {str(e)}')
-        return redirect('tutors:reports')
-
-
-def export_students_info(request):
+    else:
+        students_queryset = Student.objects.filter(
+            academic_group__in=assigned_groups,
+            is_active=True
+        ).select_related(
+            'academic_group',
+            'academic_group__department',
+            'academic_group__school'
+        ).order_by('academic_group__group_name', 'last_name', 'first_name')
     
-    try:
-        tutor = Tutor.objects.get(id=request.session['tutor_id'])
-        assigned_groups = tutor.assigned_groups.filter(is_active=True)
-        students = Student.objects.filter(academic_group__in=assigned_groups, is_active=True).order_by('last_name', 'first_name')
-        
-        # Create workbook and worksheet
-        wb = openpyxl.Workbook()
-        ws = wb.active
-        ws.title = "TALABALAR TO'G'RISIDA MA'LUMOT"
-        
-        # Define headers in Uzbek with English translations
-        headers = [
-            "T/R",  # No.
-            "F.I.SH",  # Full Name
-            "Tug'ilgan sanasi",  # Birthday
-            "Jinsi",  # Gender
-            "Millati",  # Nationality
-            "Manzili",  # Address
-            "Telefon raqami",  # Phone
-            "Elektron pochta",  # Email
-            "Guruhi",  # Group
-        ]
-        
-        # Style headers
-        header_font = Font(bold=True, color="FFFFFF")
-        header_fill = PatternFill(start_color="366092", end_color="366092", fill_type="solid")
-        
-        for col, header in enumerate(headers, 1):
-            cell = ws.cell(row=1, column=col, value=header)
-            cell.font = header_font
-            cell.fill = header_fill
-            cell.alignment = Alignment(horizontal="center")
-        
-        # Add student data
-        for row, student in enumerate(students, 2):
-            ws.cell(row=row, column=1, value=row-1)  # T/R
-            ws.cell(row=row, column=2, value=f"{student.last_name} {student.first_name} {student.middle_name or ''}".strip())  # F.I.SH
-            ws.cell(row=row, column=3, value=student.birthday.strftime("%d.%m.%Y") if student.birthday else "")  # Tug'ilgan sanasi
-            ws.cell(row=row, column=4, value=student.get_gender_display() if student.gender else "")  # Jinsi
-            ws.cell(row=row, column=5, value=student.get_nation_display() if student.nation else "")  # Millati
-            ws.cell(row=row, column=6, value=student.home_address or "")  # Manzili
-            ws.cell(row=row, column=7, value=student.phone_number or "")  # Telefon raqami
-            ws.cell(row=row, column=8, value=student.email or "")  # Elektron pochta
-            ws.cell(row=row, column=9, value=student.academic_group.group_name if student.academic_group else "")  # Guruhi
-        
-        # Auto-adjust column widths
-        for column in ws.columns:
-            max_length = 0
-            column_letter = column[0].column_letter
-            for cell in column:
-                try:
-                    if len(str(cell.value)) > max_length:
-                        max_length = len(str(cell.value))
-                except:
-                    pass
-            adjusted_width = min(max_length + 2, 50)
-            ws.column_dimensions[column_letter].width = adjusted_width
-        
-        # Prepare response
-        response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-        filename = f"Talabalar_ma'lumotlari_{datetime.now().strftime('%Y%m%d_%H%M%S')}.xlsx"
-        response['Content-Disposition'] = f'attachment; filename="{filename}"'
-        
-        wb.save(response)
-        return response
-        
-    except Tutor.DoesNotExist:
-        messages.error(request, 'Tutor not found.')
-        return redirect('login')
-
-
-def export_parents_info(request):
-    """Export OTA-ONALAR TO'G'RISIDA MA'LUMOT (Parents Information)"""
-    if 'tutor_id' not in request.session:
-        messages.error(request, 'Please log in to access this page.')
-        return redirect('login')
+    # Define all available fields organized by categories
+    FIELD_CATEGORIES = {
+        'Academic Information': {
+            'group_name': 'Group Name',
+            'department': 'Department',
+            'study_year': 'Study Year',
+        },
+        'Personal Information': {
+            'birthday': 'Date of Birth',
+            'gender': 'Gender',
+            'nation': 'Nationality',
+            'id_card': 'ID Card',
+            'home_address': 'Home Address',
+            'phone_number': 'Phone Number',
+            'email': 'Email',
+            'telegram_username': 'Telegram Username',
+            'marital_status': 'Marital Status',
+        },
+        'Family Status': {
+            'is_from_large_family': 'From Large Family',
+            'is_from_low_income_family': 'From Low Income Family',
+            'is_from_troubled_family': 'From Troubled Family',
+            'are_parents_deceased': 'Parents Deceased',
+            'are_parents_divorced': 'Parents Divorced',
+            'is_father_deceased': 'Father Deceased',
+            'is_mother_deceased': 'Mother Deceased',
+            'has_disability': 'Has Disability',
+        },
+        'Father Information': {
+            'father_first_name': "Father's First Name",
+            'father_last_name': "Father's Last Name",
+            'father_middle_name': "Father's Middle Name",
+            'father_phone_number': "Father's Phone Number",
+            'father_telegram_username': "Father's Telegram Username",
+            'is_father_retired': 'Father Retired',
+            'is_father_disabled': 'Father Disabled',
+        },
+        'Mother Information': {
+            'mother_first_name': "Mother's First Name",
+            'mother_last_name': "Mother's Last Name",
+            'mother_middle_name': "Mother's Middle Name",
+            'mother_phone_number': "Mother's Phone Number",
+            'mother_telegram_username': "Mother's Telegram Username",
+            'is_mother_retired': 'Mother Retired',
+            'is_mother_disabled': 'Mother Disabled',
+        },
+        'Additional Family Information': {
+            'siblings_count': 'Number of Siblings',
+            'children_count': 'Number of Children',
+            'guardian_name': 'Guardian Name',
+            'guardian_phone_number': 'Guardian Phone',
+        },
+        'Personal Interests': {
+            'hobbies': 'Hobbies and Interests',
+            'special_skills': 'Special Skills and Talents',
+            'languages_spoken': 'Languages Spoken',
+        },
+        'System/Agreement Fields': {
+            'agreed_to_code_of_conduct': 'Agreed to Code of Conduct',
+            'code_agreement_date': 'Date of Agreement',
+        }
+    }
     
-    try:
-        tutor = Tutor.objects.get(id=request.session['tutor_id'])
-        assigned_groups = tutor.assigned_groups.filter(is_active=True)
-        students = Student.objects.filter(academic_group__in=assigned_groups, is_active=True).order_by('last_name', 'first_name')
-        
-        # Create workbook and worksheet
-        wb = openpyxl.Workbook()
-        ws = wb.active
-        ws.title = "OTA-ONALAR TO'G'RISIDA MA'LUMOT"
-        
-        # Define headers in Uzbek
-        headers = [
-            "T/R",  # No.
-            "Talaba F.I.SH",  # Student Full Name
-            "Ota F.I.SH",  # Father Full Name
-            "Ota telefoni",  # Father Phone
-            "Ona F.I.SH",  # Mother Full Name
-            "Ona telefoni",  # Mother Phone
-            "Vasiy F.I.SH",  # Guardian Full Name
-            "Vasiy telefoni",  # Guardian Phone
-            "Farzandlar soni",  # Number of Children
-            "Aka-uka soni",  # Number of Siblings
-            "Guruhi",  # Group
-        ]
-        
-        # Style headers
-        header_font = Font(bold=True, color="FFFFFF")
-        header_fill = PatternFill(start_color="366092", end_color="366092", fill_type="solid")
-        
-        for col, header in enumerate(headers, 1):
-            cell = ws.cell(row=1, column=col, value=header)
-            cell.font = header_font
-            cell.fill = header_fill
-            cell.alignment = Alignment(horizontal="center")
-        
-        # Add student data
-        for row, student in enumerate(students, 2):
-            ws.cell(row=row, column=1, value=row-1)  # T/R
-            ws.cell(row=row, column=2, value=f"{student.last_name} {student.first_name} {student.middle_name or ''}".strip())  # Talaba F.I.SH
-            ws.cell(row=row, column=3, value=student.father_name or "")  # Ota F.I.SH
-            ws.cell(row=row, column=4, value=student.father_phone_number or "")  # Ota telefoni
-            ws.cell(row=row, column=5, value=student.mother_name or "")  # Ona F.I.SH
-            ws.cell(row=row, column=6, value=student.mother_phone_number or "")  # Ona telefoni
-            ws.cell(row=row, column=7, value=student.guardian_name or "")  # Vasiy F.I.SH
-            ws.cell(row=row, column=8, value=student.guardian_phone_number or "")  # Vasiy telefoni
-            ws.cell(row=row, column=9, value=student.children_count or "")  # Farzandlar soni
-            ws.cell(row=row, column=10, value=student.siblings_count or "")  # Aka-uka soni
-            ws.cell(row=row, column=11, value=student.academic_group.group_name if student.academic_group else "")  # Guruhi
-        
-        # Auto-adjust column widths
-        for column in ws.columns:
-            max_length = 0
-            column_letter = column[0].column_letter
-            for cell in column:
-                try:
-                    if len(str(cell.value)) > max_length:
-                        max_length = len(str(cell.value))
-                except:
-                    pass
-            adjusted_width = min(max_length + 2, 50)
-            ws.column_dimensions[column_letter].width = adjusted_width
-        
-        # Prepare response
-        response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-        filename = f"Ota-onalar_ma'lumotlari_{datetime.now().strftime('%Y%m%d_%H%M%S')}.xlsx"
-        response['Content-Disposition'] = f'attachment; filename="{filename}"'
-        
-        wb.save(response)
-        return response
-        
-    except Tutor.DoesNotExist:
-        messages.error(request, 'Tutor not found.')
-        return redirect('login')
-
-
-def export_social_status(request):
-    """Export IJTIMOIY AHVOL (Social Status)"""
-    if 'tutor_id' not in request.session:
-        messages.error(request, 'Please log in to access this page.')
-        return redirect('login')
+    # Get selected fields from request
+    selected_fields = []
+    for category, fields in FIELD_CATEGORIES.items():
+        for field_name, field_label in fields.items():
+            if request.GET.get(f'field_{field_name}'):
+                selected_fields.append(field_name)
     
-    try:
-        tutor = Tutor.objects.get(id=request.session['tutor_id'])
-        assigned_groups = tutor.assigned_groups.filter(is_active=True)
-        students = Student.objects.filter(academic_group__in=assigned_groups, is_active=True).order_by('last_name', 'first_name')
-        
-        # Create workbook and worksheet
-        wb = openpyxl.Workbook()
-        ws = wb.active
-        ws.title = "IJTIMOIY AHVOL"
-        
-        # Define headers in Uzbek
-        headers = [
-            "T/R",  # No.
-            "Talaba F.I.SH",  # Student Full Name
-            "Qiziqishlari",  # Hobbies/Interests
-            "Maxsus ko'nikmalari",  # Special Skills
-            "Tillar",  # Languages
-            "Ijtimoiy faollik",  # Social Activity
-            "Akademik guruh",  # Academic Group
-            "Oila ahvoli",  # Family Status
-        ]
-        
-        # Style headers
-        header_font = Font(bold=True, color="FFFFFF")
-        header_fill = PatternFill(start_color="366092", end_color="366092", fill_type="solid")
-        
-        for col, header in enumerate(headers, 1):
-            cell = ws.cell(row=1, column=col, value=header)
-            cell.font = header_font
-            cell.fill = header_fill
-            cell.alignment = Alignment(horizontal="center")
-        
-        # Add student data
-        for row, student in enumerate(students, 2):
-            # Determine family status based on available parent information
-            family_status = "To'liq oila"  # Complete family
-            if not student.father_name and not student.mother_name:
-                family_status = "Yetim"  # Orphan
-            elif not student.father_name:
-                family_status = "Otasiz"  # Fatherless
-            elif not student.mother_name:
-                family_status = "Onasiz"  # Motherless
+    # Format student data for display
+    students_data = []
+    if request.GET.get('apply_filter') and selected_fields:  # Only process if filter is applied
+        for student in students_queryset:
+            student_data = {
+                'id': student.id,
+                'full_name': student.get_full_name(),
+                'group_name': student.academic_group.group_name,
+            }
             
-            ws.cell(row=row, column=1, value=row-1)  # T/R
-            ws.cell(row=row, column=2, value=f"{student.last_name} {student.first_name} {student.middle_name or ''}".strip())  # Talaba F.I.SH
-            ws.cell(row=row, column=3, value=student.hobbies or "")  # Qiziqishlari
-            ws.cell(row=row, column=4, value=student.special_skills or "")  # Maxsus ko'nikmalari
-            ws.cell(row=row, column=5, value=student.languages_spoken or "")  # Tillar
-            ws.cell(row=row, column=6, value=student.social_media_activity or "")  # Ijtimoiy faollik
-            ws.cell(row=row, column=7, value=student.academic_group.group_name if student.academic_group else "")  # Akademik guruh
-            ws.cell(row=row, column=8, value=family_status)  # Oila ahvoli
-        
-        # Auto-adjust column widths
-        for column in ws.columns:
-            max_length = 0
-            column_letter = column[0].column_letter
-            for cell in column:
-                try:
-                    if len(str(cell.value)) > max_length:
-                        max_length = len(str(cell.value))
-                except:
-                    pass
-            adjusted_width = min(max_length + 2, 50)
-            ws.column_dimensions[column_letter].width = adjusted_width
-        
-        # Prepare response
-        response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-        filename = f"Ijtimoiy_ahvol_{datetime.now().strftime('%Y%m%d_%H%M%S')}.xlsx"
-        response['Content-Disposition'] = f'attachment; filename="{filename}"'
-        
-        wb.save(response)
-        return response
-        
-    except Tutor.DoesNotExist:
-        messages.error(request, 'Tutor not found.')
-        return redirect('login')
+            # Add selected fields with proper formatting
+            for field in selected_fields:
+                if field == 'group_name':
+                    value = student.academic_group.group_name
+                elif field == 'department':
+                    value = student.academic_group.department.name if student.academic_group.department else 'Not provided'
+                elif field == 'study_year':
+                    value = student.academic_group.get_study_year_display() if student.academic_group.study_year else 'Not provided'
+                elif field == 'birthday':
+                    value = student.birthday.strftime('%d/%m/%Y') if student.birthday else 'Not provided'
+                elif field == 'code_agreement_date':
+                    value = student.code_agreement_date.strftime('%d/%m/%Y') if student.code_agreement_date else 'Not provided'
+                elif field.startswith('is_') or field.startswith('are_') or field.startswith('has_') or field == 'agreed_to_code_of_conduct':
+                    # Boolean fields
+                    field_value = getattr(student, field, False)
+                    value = 'Yes' if field_value else 'No'
+                elif field == 'gender':
+                    value = student.get_gender_display() if student.gender else 'Not provided'
+                elif field == 'nation':
+                    value = student.get_nation_display() if student.nation else 'Not provided'
+                elif field == 'marital_status':
+                    value = student.get_marital_status_display() if student.marital_status else 'Not provided'
+                else:
+                    # Text and number fields
+                    field_value = getattr(student, field, None)
+                    if field_value is None or field_value == '':
+                        value = 'Not provided'
+                    else:
+                        value = str(field_value)
+                
+                student_data[field] = value
+            
+            students_data.append(student_data)
+    
+    context = {
+        'tutor_name': request.session.get('tutor_name'),
+        'tutor_username': request.session.get('tutor_username'),
+        'tutor': tutor,
+        'assigned_groups': assigned_groups,
+        'selected_group': selected_group,
+        'field_categories': FIELD_CATEGORIES,
+        'selected_fields': selected_fields,
+        'students_data': students_data,
+        'total_students': len(students_data),
+        'filter_applied': request.GET.get('apply_filter', False),
+    }
+    
+    return render(request, 'tutors/reports.html', context)
