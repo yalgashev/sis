@@ -272,11 +272,77 @@
             icon.classList.toggle('rotate-180');
         }
 
+        // Hide/show Father Information section based on father_deceased checkbox
+        function toggleFatherSection() {
+            const fatherDeceasedCheckbox = document.querySelector('input[name="field_is_father_deceased"]');
+            const categorySections = document.querySelectorAll('.category-section');
+            let fatherSection = null;
+            
+            categorySections.forEach(section => {
+                const header = section.querySelector('.category-header h3');
+                if (header && header.textContent.trim() === 'Father Information') {
+                    fatherSection = section;
+                }
+            });
+            
+            if (fatherDeceasedCheckbox && fatherSection) {
+                if (fatherDeceasedCheckbox.checked) {
+                    fatherSection.style.display = 'none';
+                    // Uncheck all Father Information checkboxes
+                    fatherSection.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+                        cb.checked = false;
+                    });
+                } else {
+                    fatherSection.style.display = 'block';
+                }
+            }
+        }
+
+        // Hide/show Mother Information section based on mother_deceased checkbox
+        function toggleMotherSection() {
+            const motherDeceasedCheckbox = document.querySelector('input[name="field_is_mother_deceased"]');
+            const categorySections = document.querySelectorAll('.category-section');
+            let motherSection = null;
+            
+            categorySections.forEach(section => {
+                const header = section.querySelector('.category-header h3');
+                if (header && header.textContent.trim() === 'Mother Information') {
+                    motherSection = section;
+                }
+            });
+            
+            if (motherDeceasedCheckbox && motherSection) {
+                if (motherDeceasedCheckbox.checked) {
+                    motherSection.style.display = 'none';
+                    // Uncheck all Mother Information checkboxes
+                    motherSection.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+                        cb.checked = false;
+                    });
+                } else {
+                    motherSection.style.display = 'block';
+                }
+            }
+        }
+
         // Auto-expand first category on load
         document.addEventListener('DOMContentLoaded', function() {
             const firstCategory = document.querySelector('.category-header');
             if (firstCategory) {
                 toggleCategory(firstCategory);
+            }
+
+            // Setup event listeners for deceased checkboxes
+            const fatherDeceasedCheckbox = document.querySelector('input[name="field_is_father_deceased"]');
+            const motherDeceasedCheckbox = document.querySelector('input[name="field_is_mother_deceased"]');
+            
+            if (fatherDeceasedCheckbox) {
+                fatherDeceasedCheckbox.addEventListener('change', toggleFatherSection);
+                toggleFatherSection(); // Initial check
+            }
+            
+            if (motherDeceasedCheckbox) {
+                motherDeceasedCheckbox.addEventListener('change', toggleMotherSection);
+                toggleMotherSection(); // Initial check
             }
         });
 

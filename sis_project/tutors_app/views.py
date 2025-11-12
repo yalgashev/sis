@@ -484,8 +484,6 @@ def tutor_reports_view(request):
         'Additional Family Information': {
             'siblings_count': 'Number of Siblings',
             'children_count': 'Number of Children',
-            'guardian_name': 'Guardian Name',
-            'guardian_phone_number': 'Guardian Phone',
         },
         'Personal Interests': {
             'hobbies': 'Hobbies and Interests',
