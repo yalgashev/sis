@@ -325,3 +325,56 @@ class Student(models.Model):
         """Update the last login timestamp"""
         self.last_login = timezone.now()
         self.save(update_fields=['last_login'])
+
+
+class StudentHobby(models.Model):
+    """Model for student hobbies and interests - allows multiple entries per student"""
+    student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='hobby_entries')
+    hobby = models.CharField(max_length=200, help_text="Hobby or interest")
+    created_at = models.DateTimeField(default=timezone.now)
+
+    class Meta:
+        db_table = 'student_hobbies'
+        ordering = ['created_at']
+        verbose_name_plural = 'Student Hobbies'
+
+    def __str__(self):
+        return f"{self.student.get_full_name()} - {self.hobby}"
+
+
+class StudentSkill(models.Model):
+    """Model for student special skills and talents - allows multiple entries per student"""
+    student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='skill_entries')
+    skill = models.CharField(max_length=200, help_text="Special skill or talent")
+    created_at = models.DateTimeField(default=timezone.now)
+
+    class Meta:
+        db_table = 'student_skills'
+        ordering = ['created_at']
+        verbose_name_plural = 'Student Skills'
+
+    def __str__(self):
+        return f"{self.student.get_full_name()} - {self.skill}"
+
+
+class StudentLanguage(models.Model):
+    """Model for languages spoken by student - allows multiple entries per student"""
+    PROFICIENCY_CHOICES = [
+        ('beginner', 'Beginner'),
+        ('intermediate', 'Intermediate'),
+        ('advanced', 'Advanced'),
+        ('native', 'Native'),
+    ]
+    
+    student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='language_entries')
+    language = models.CharField(max_length=100, help_text="Language name")
+    proficiency = models.CharField(max_length=20, choices=PROFICIENCY_CHOICES, default='intermediate', help_text="Proficiency level")
+    created_at = models.DateTimeField(default=timezone.now)
+
+    class Meta:
+        db_table = 'student_languages'
+        ordering = ['created_at']
+        verbose_name_plural = 'Student Languages'
+
+    def __str__(self):
+        return f"{self.student.get_full_name()} - {self.language} ({self.get_proficiency_display()})"

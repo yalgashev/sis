@@ -25,6 +25,8 @@
         body { font-family: 'Inter', sans-serif; }
         .sidebar-item:hover { background-color: #374151; }
         .sidebar-item.active { background-color: #667eea; }
+        .entry-item { transition: all 0.3s ease; }
+        .entry-item:hover { background-color: #f9fafb; transform: translateX(4px); }
     </style>
 </head>
 <body class="bg-gray-50">
@@ -136,206 +138,212 @@
                     {% endfor %}
                 {% endif %}
 
-                <!-- Additional Information Form -->
-                <div class="bg-white rounded-xl shadow-sm border border-gray-100">
-                    <div class="p-6 border-b border-gray-200">
+                <!-- Hobbies & Interests Section -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-100 mb-6">
+                    <div class="p-6 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-purple-50">
                         <h3 class="text-lg font-semibold text-gray-900 flex items-center">
-                            <i class="fas fa-heart mr-3 text-primary"></i>
-                            Personal Interests & Skills
+                            <i class="fas fa-gamepad mr-3 text-blue-600"></i>
+                            Hobbies & Interests
                         </h3>
-                        <p class="text-gray-600 mt-2">Tell us about your hobbies, skills, and languages to help us know you better.</p>
+                        <p class="text-gray-600 mt-1 text-sm">Add as many hobbies as you like</p>
                     </div>
-
                     <div class="p-6">
-                        <form method="post" class="space-y-8">
+                        <!-- Add Hobby Form -->
+                        <form method="post" class="mb-4">
                             {% csrf_token %}
-
-                            <!-- Personal Interests & Skills -->
-                            <div class="bg-purple-50 border border-purple-200 rounded-lg p-6">
-                                <h4 class="text-lg font-semibold text-purple-900 mb-6 flex items-center">
-                                    <i class="fas fa-star mr-2 text-purple-600"></i>
-                                    Your Interests & Abilities
-                                </h4>
-                                
-                                <div class="space-y-6">
-                                    <!-- Hobbies -->
-                                    <div>
-                                        <label class="block text-sm font-medium text-purple-700 mb-2">
-                                            <i class="fas fa-gamepad mr-1"></i>
-                                            Hobbies & Interests
-                                        </label>
-                                        {{ form.hobbies }}
-                                        {% if form.hobbies.errors %}
-                                            <div class="mt-1 text-sm text-red-600">{{ form.hobbies.errors }}</div>
-                                        {% endif %}
-                                        <p class="text-xs text-purple-600 mt-1">Select your main hobby from the list</p>
-                                    </div>
-
-                                    <!-- Other Hobby Input -->
-                                    <div id="hobbies-other-section" style="display: none;">
-                                        <label class="block text-sm font-medium text-purple-700 mb-2">
-                                            <i class="fas fa-edit mr-1"></i>
-                                            Please specify your hobby:
-                                        </label>
-                                        {{ form.hobbies_other }}
-                                        {% if form.hobbies_other.errors %}
-                                            <div class="mt-1 text-sm text-red-600">{{ form.hobbies_other.errors }}</div>
-                                        {% endif %}
-                                        <p class="text-xs text-purple-600 mt-1">Describe your hobby in detail</p>
-                                    </div>
-
-                                    <!-- Special Skills -->
-                                    <div>
-                                        <label class="block text-sm font-medium text-purple-700 mb-2">
-                                            <i class="fas fa-medal mr-1"></i>
-                                            Special Skills & Talents
-                                        </label>
-                                        {{ form.special_skills }}
-                                        {% if form.special_skills.errors %}
-                                            <div class="mt-1 text-sm text-red-600">{{ form.special_skills.errors }}</div>
-                                        {% endif %}
-                                        <p class="text-xs text-purple-600 mt-1">Select your main skill from the list</p>
-                                    </div>
-
-                                    <!-- Other Skills Input -->
-                                    <div id="skills-other-section" style="display: none;">
-                                        <label class="block text-sm font-medium text-purple-700 mb-2">
-                                            <i class="fas fa-edit mr-1"></i>
-                                            Please specify your skill:
-                                        </label>
-                                        {{ form.special_skills_other }}
-                                        {% if form.special_skills_other.errors %}
-                                            <div class="mt-1 text-sm text-red-600">{{ form.special_skills_other.errors }}</div>
-                                        {% endif %}
-                                        <p class="text-xs text-purple-600 mt-1">Describe your special skill or talent</p>
-                                    </div>
-
-                                    <!-- Languages -->
-                                    <div>
-                                        <label class="block text-sm font-medium text-purple-700 mb-2">
-                                            <i class="fas fa-language mr-1"></i>
-                                            Languages Spoken
-                                        </label>
-                                        {{ form.languages_spoken }}
-                                        {% if form.languages_spoken.errors %}
-                                            <div class="mt-1 text-sm text-red-600">{{ form.languages_spoken.errors }}</div>
-                                        {% endif %}
-                                        <p class="text-xs text-purple-600 mt-1">Select languages common in Central Asia</p>
-                                    </div>
-
-                                    <!-- Other Language Input -->
-                                    <div id="languages-other-section" style="display: none;">
-                                        <label class="block text-sm font-medium text-purple-700 mb-2">
-                                            <i class="fas fa-edit mr-1"></i>
-                                            Please specify the language and proficiency level:
-                                        </label>
-                                        {{ form.languages_spoken_other }}
-                                        {% if form.languages_spoken_other.errors %}
-                                            <div class="mt-1 text-sm text-red-600">{{ form.languages_spoken_other.errors }}</div>
-                                        {% endif %}
-                                        <p class="text-xs text-purple-600 mt-1">Example: German - Intermediate, Japanese - Basic</p>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Information Notice -->
-                            <div class="bg-blue-50 border border-blue-200 rounded-lg p-6">
-                                <h4 class="text-lg font-semibold text-blue-900 mb-3 flex items-center">
-                                    <i class="fas fa-info-circle mr-2 text-blue-600"></i>
-                                    Why This Information Helps
-                                </h4>
-                                <ul class="text-sm text-blue-800 space-y-2">
-                                    <li class="flex items-start">
-                                        <i class="fas fa-check-circle mr-2 mt-0.5 text-blue-600"></i>
-                                        Helps us understand your interests and match you with relevant activities
-                                    </li>
-                                    <li class="flex items-start">
-                                        <i class="fas fa-check-circle mr-2 mt-0.5 text-blue-600"></i>
-                                        Allows us to connect you with students who share similar interests
-                                    </li>
-                                    <li class="flex items-start">
-                                        <i class="fas fa-check-circle mr-2 mt-0.5 text-blue-600"></i>
-                                        Helps in organizing clubs, events, and extracurricular activities
-                                    </li>
-                                    <li class="flex items-start">
-                                        <i class="fas fa-check-circle mr-2 mt-0.5 text-blue-600"></i>
-                                        Language skills help in academic and social support programs
-                                    </li>
-                                </ul>
-                            </div>
-
-                            <!-- Form Actions -->
-                            <div class="pt-6 border-t border-gray-200">
-                                <div class="flex items-center justify-between">
-                                    <a href="{% url 'students:dashboard' %}" 
-                                       class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">
-                                        <i class="fas fa-arrow-left mr-2"></i>
-                                        Back to Dashboard
-                                    </a>
-                                    <button type="submit" 
-                                            class="px-6 py-2 bg-primary text-white rounded-lg hover:bg-blue-600 transition-colors">
-                                        <i class="fas fa-save mr-2"></i>
-                                        Save Information
-                                    </button>
-                                </div>
+                            <input type="hidden" name="action" value="add_hobby">
+                            <div class="flex gap-2">
+                                <input type="text" name="hobby" placeholder="Enter a hobby or interest (e.g., Reading, Sports, Music...)" 
+                                       class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                       required>
+                                <button type="submit" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center">
+                                    <i class="fas fa-plus mr-2"></i>Add
+                                </button>
                             </div>
                         </form>
+
+                        <!-- Existing Hobbies List -->
+                        {% if hobbies %}
+                            <div class="space-y-2">
+                                {% for hobby in hobbies %}
+                                    <div class="entry-item flex items-center justify-between p-3 border border-gray-200 rounded-lg">
+                                        <div class="flex items-center">
+                                            <i class="fas fa-heart text-blue-500 mr-3"></i>
+                                            <span class="text-gray-800">{{ hobby.hobby }}</span>
+                                        </div>
+                                        <form method="post" class="inline">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="action" value="delete_hobby">
+                                            <input type="hidden" name="hobby_id" value="{{ hobby.id }}">
+                                            <button type="submit" class="text-red-600 hover:text-red-800 transition-colors" 
+                                                    onclick="return confirm('Remove this hobby?')">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <div class="text-center py-8 text-gray-400">
+                                <i class="fas fa-inbox text-4xl mb-2"></i>
+                                <p>No hobbies added yet. Start by adding your first hobby!</p>
+                            </div>
+                        {% endif %}
                     </div>
+                </div>
+
+                <!-- Special Skills & Talents Section -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-100 mb-6">
+                    <div class="p-6 border-b border-gray-200 bg-gradient-to-r from-green-50 to-teal-50">
+                        <h3 class="text-lg font-semibold text-gray-900 flex items-center">
+                            <i class="fas fa-medal mr-3 text-green-600"></i>
+                            Special Skills & Talents
+                        </h3>
+                        <p class="text-gray-600 mt-1 text-sm">Showcase your unique abilities</p>
+                    </div>
+                    <div class="p-6">
+                        <!-- Add Skill Form -->
+                        <form method="post" class="mb-4">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="add_skill">
+                            <div class="flex gap-2">
+                                <input type="text" name="skill" placeholder="Enter a skill or talent (e.g., Programming, Public Speaking...)" 
+                                       class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                       required>
+                                <button type="submit" class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center">
+                                    <i class="fas fa-plus mr-2"></i>Add
+                                </button>
+                            </div>
+                        </form>
+
+                        <!-- Existing Skills List -->
+                        {% if skills %}
+                            <div class="space-y-2">
+                                {% for skill in skills %}
+                                    <div class="entry-item flex items-center justify-between p-3 border border-gray-200 rounded-lg">
+                                        <div class="flex items-center">
+                                            <i class="fas fa-star text-green-500 mr-3"></i>
+                                            <span class="text-gray-800">{{ skill.skill }}</span>
+                                        </div>
+                                        <form method="post" class="inline">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="action" value="delete_skill">
+                                            <input type="hidden" name="skill_id" value="{{ skill.id }}">
+                                            <button type="submit" class="text-red-600 hover:text-red-800 transition-colors" 
+                                                    onclick="return confirm('Remove this skill?')">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <div class="text-center py-8 text-gray-400">
+                                <i class="fas fa-inbox text-4xl mb-2"></i>
+                                <p>No skills added yet. Share your talents with us!</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Languages Spoken Section -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-100 mb-6">
+                    <div class="p-6 border-b border-gray-200 bg-gradient-to-r from-purple-50 to-pink-50">
+                        <h3 class="text-lg font-semibold text-gray-900 flex items-center">
+                            <i class="fas fa-language mr-3 text-purple-600"></i>
+                            Languages Spoken
+                        </h3>
+                        <p class="text-gray-600 mt-1 text-sm">List all languages you can speak</p>
+                        </div>
+                    <div class="p-6">
+                        <!-- Add Language Form -->
+                        <form method="post" class="mb-4">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="add_language">
+                            <div class="flex gap-2">
+                                <input type="text" name="language" placeholder="Language name (e.g., English, Uzbek, Russian...)" 
+                                       class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                                       required>
+                                <select name="proficiency" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                                    {% for value, label in proficiency_choices %}
+                                        <option value="{{ value }}">{{ label }}</option>
+                                    {% endfor %}
+                                </select>
+                                <button type="submit" class="px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors flex items-center">
+                                    <i class="fas fa-plus mr-2"></i>Add
+                                </button>
+                            </div>
+                        </form>
+
+                        <!-- Existing Languages List -->
+                        {% if languages %}
+                            <div class="space-y-2">
+                                {% for language in languages %}
+                                    <div class="entry-item flex items-center justify-between p-3 border border-gray-200 rounded-lg">
+                                        <div class="flex items-center">
+                                            <i class="fas fa-globe text-purple-500 mr-3"></i>
+                                            <span class="text-gray-800 font-medium">{{ language.language }}</span>
+                                            <span class="ml-3 px-3 py-1 bg-purple-100 text-purple-700 text-xs rounded-full">
+                                                {{ language.get_proficiency_display }}
+                                            </span>
+                                        </div>
+                                        <form method="post" class="inline">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="action" value="delete_language">
+                                            <input type="hidden" name="language_id" value="{{ language.id }}">
+                                            <button type="submit" class="text-red-600 hover:text-red-800 transition-colors" 
+                                                    onclick="return confirm('Remove this language?')">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <div class="text-center py-8 text-gray-400">
+                                <i class="fas fa-inbox text-4xl mb-2"></i>
+                                <p>No languages added yet. Tell us which languages you speak!</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Information Notice -->
+                <div class="bg-blue-50 border border-blue-200 rounded-lg p-6">
+                    <h4 class="text-lg font-semibold text-blue-900 mb-3 flex items-center">
+                        <i class="fas fa-info-circle mr-2 text-blue-600"></i>
+                        Why This Information Helps
+                    </h4>
+                    <ul class="text-sm text-blue-800 space-y-2">
+                        <li class="flex items-start">
+                            <i class="fas fa-check-circle mr-2 mt-0.5 text-blue-600"></i>
+                            Helps us understand your interests and match you with relevant activities
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check-circle mr-2 mt-0.5 text-blue-600"></i>
+                            Allows us to connect you with students who share similar interests
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check-circle mr-2 mt-0.5 text-blue-600"></i>
+                            Helps in organizing clubs, events, and extracurricular activities
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check-circle mr-2 mt-0.5 text-blue-600"></i>
+                            Language skills help in academic and social support programs
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Back Button -->
+                <div class="mt-6">
+                    <a href="{% url 'students:dashboard' %}" 
+                       class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">
+                        <i class="fas fa-arrow-left mr-2"></i>
+                        Back to Dashboard
+                    </a>
                 </div>
             </main>
         </div>
     </div>
-
-    <script>
-        // Style form inputs
-        document.addEventListener('DOMContentLoaded', function() {
-            const inputs = document.querySelectorAll('input, select, textarea');
-            inputs.forEach(input => {
-                if (input.tagName.toLowerCase() === 'select') {
-                    input.className = 'mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary';
-                } else if (input.tagName.toLowerCase() === 'textarea') {
-                    input.className = 'mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary focus:border-primary resize-vertical min-h-[80px]';
-                } else if (input.type !== 'checkbox') {
-                    input.className = 'mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary focus:border-primary';
-                }
-                
-                // Add error styling
-                if (input.parentNode.querySelector('.text-red-600')) {
-                    input.classList.add('border-red-300', 'focus:ring-red-500', 'focus:border-red-500');
-                }
-            });
-
-            // Handle "Other" option visibility
-            const hobbiesSelect = document.querySelector('select[name="hobbies"]');
-            const hobbiesOtherSection = document.getElementById('hobbies-other-section');
-            
-            const skillsSelect = document.querySelector('select[name="special_skills"]');
-            const skillsOtherSection = document.getElementById('skills-other-section');
-            
-            const languagesSelect = document.querySelector('select[name="languages_spoken"]');
-            const languagesOtherSection = document.getElementById('languages-other-section');
-
-            function toggleOtherSection(selectElement, otherSection) {
-                if (selectElement && otherSection) {
-                    selectElement.addEventListener('change', function() {
-                        if (this.value === 'other') {
-                            otherSection.style.display = 'block';
-                        } else {
-                            otherSection.style.display = 'none';
-                        }
-                    });
-                    
-                    // Initial check
-                    if (selectElement.value === 'other') {
-                        otherSection.style.display = 'block';
-                    }
-                }
-            }
-
-            toggleOtherSection(hobbiesSelect, hobbiesOtherSection);
-            toggleOtherSection(skillsSelect, skillsOtherSection);
-            toggleOtherSection(languagesSelect, languagesOtherSection);
-        });
-    </script>
 </body>
 </html>

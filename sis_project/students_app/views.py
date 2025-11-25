@@ -7,7 +7,7 @@ from django.views.decorators.http import require_POST
 import json
 import sys
 import os
-from admin_app.models import Student
+from admin_app.models import Student, StudentHobby, StudentSkill, StudentLanguage
 from .forms import (
     StudentPersonalDataForm, StudentContactInfoForm, 
     StudentFamilyInfoForm, StudentAdditionalInfoForm,
@@ -161,7 +161,7 @@ def student_family_info_view(request):
 
 
 def student_additional_info_view(request):
-    """Additional information management - Personal Interests & Skills"""
+    """Additional information management - Personal Interests & Skills with dynamic entries"""
     if 'student_id' not in request.session:
         messages.error(request, 'Please log in to access this page.')
         return redirect('login')
@@ -173,45 +173,70 @@ def student_additional_info_view(request):
         return redirect('login')
     
     if request.method == 'POST':
-        form = StudentAdditionalInfoForm(request.POST)
-        if form.is_valid():
-            # Handle hobbies
-            hobbies = form.cleaned_data.get('hobbies')
-            if hobbies == 'other':
-                student.hobbies = form.cleaned_data.get('hobbies_other', '')
+        action = request.POST.get('action')
+        
+        if action == 'add_hobby':
+            hobby_text = request.POST.get('hobby', '').strip()
+            if hobby_text:
+                StudentHobby.objects.create(student=student, hobby=hobby_text)
+                messages.success(request, f'Hobby "{hobby_text}" added successfully!')
             else:
-                student.hobbies = hobbies
-            
-            # Handle special skills
-            special_skills = form.cleaned_data.get('special_skills')
-            if special_skills == 'other':
-                student.special_skills = form.cleaned_data.get('special_skills_other', '')
+                messages.error(request, 'Please enter a hobby.')
+                
+        elif action == 'delete_hobby':
+            hobby_id = request.POST.get('hobby_id')
+            if hobby_id:
+                StudentHobby.objects.filter(id=hobby_id, student=student).delete()
+                messages.success(request, 'Hobby removed successfully!')
+                
+        elif action == 'add_skill':
+            skill_text = request.POST.get('skill', '').strip()
+            if skill_text:
+                StudentSkill.objects.create(student=student, skill=skill_text)
+                messages.success(request, f'Skill "{skill_text}" added successfully!')
             else:
-                student.special_skills = special_skills
-            
-            # Handle languages
-            languages_spoken = form.cleaned_data.get('languages_spoken')
-            if languages_spoken == 'other':
-                student.languages_spoken = form.cleaned_data.get('languages_spoken_other', '')
+                messages.error(request, 'Please enter a skill.')
+                
+        elif action == 'delete_skill':
+            skill_id = request.POST.get('skill_id')
+            if skill_id:
+                StudentSkill.objects.filter(id=skill_id, student=student).delete()
+                messages.success(request, 'Skill removed successfully!')
+                
+        elif action == 'add_language':
+            language_name = request.POST.get('language', '').strip()
+            language_proficiency = request.POST.get('proficiency', 'intermediate')
+            if language_name:
+                StudentLanguage.objects.create(
+                    student=student,
+                    language=language_name,
+                    proficiency=language_proficiency
+                )
+                messages.success(request, f'Language "{language_name}" added successfully!')
             else:
-                student.languages_spoken = languages_spoken
-            
-            student.save()
-            messages.success(request, 'Personal interests & skills updated successfully!')
-            return redirect('students:additional_info')
-    else:
-        # Initialize form with current values
-        form = StudentAdditionalInfoForm(initial={
-            'hobbies': student.hobbies or '',
-            'special_skills': student.special_skills or '',
-            'languages_spoken': student.languages_spoken or '',
-        })
+                messages.error(request, 'Please enter a language.')
+                
+        elif action == 'delete_language':
+            language_id = request.POST.get('language_id')
+            if language_id:
+                StudentLanguage.objects.filter(id=language_id, student=student).delete()
+                messages.success(request, 'Language removed successfully!')
+        
+        return redirect('students:additional_info')
+    
+    # Get all existing entries
+    hobbies = student.hobby_entries.all()
+    skills = student.skill_entries.all()
+    languages = student.language_entries.all()
     
     context = {
         'student_name': request.session.get('student_name'),
         'student_username': request.session.get('student_username'),
         'student': student,
-        'form': form,
+        'hobbies': hobbies,
+        'skills': skills,
+        'languages': languages,
+        'proficiency_choices': StudentLanguage.PROFICIENCY_CHOICES,
     }
     
     return render(request, 'students/additional_info.html', context)
